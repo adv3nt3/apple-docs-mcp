@@ -17,7 +17,7 @@
  */
 
 import { REQUEST_CONFIG, ERROR_MESSAGES, PROCESSING_LIMITS, SAFARI_USER_AGENTS } from './constants.js';
-import { handleFetchError } from './error-handler.js';
+import { ErrorType, handleFetchError } from './error-handler.js';
 import { globalRateLimiter } from './rate-limiter.js';
 import { UserAgentPool } from './user-agent-pool.js';
 import { HttpHeadersGenerator } from './http-headers-generator.js';
@@ -373,6 +373,14 @@ class HttpClient {
   async getJson<T = unknown>(url: string, options: RequestOptions = {}): Promise<T> {
     try {
       const response = await this.get(url, options);
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.toLowerCase().includes('application/json')) {
+        throw {
+          type: ErrorType.PARSE_ERROR,
+          message: 'Unexpected response content-type from upstream',
+          suggestions: ['The upstream API returned non-JSON content'],
+        };
+      }
       return await response.json() as T;
     } catch (error) {
       const appError = handleFetchError(error, url);
