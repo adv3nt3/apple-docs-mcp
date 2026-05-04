@@ -25,38 +25,47 @@ Apple 开发者文档 MCP 服务器 - 通过模型上下文协议访问 Apple �
 
 ## 🚀 快速开始
 
-### Claude Desktop（推荐）
+> **请注意**：`@adv3nt3/apple-docs-mcp` 尚未发布到 npm，因此旧文档中显示的 `npx` 片段会返回 404。在第一次 npm 发布之前，请从源代码构建。原始的 `npx` 形式片段保留在安装部分底部的 **npm 发布后** 子节中以供将来参考。
 
-将此配置添加到您的 Claude Desktop 配置文件中：
+### 1. 从源代码构建
 
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`  
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+```bash
+git clone https://github.com/adv3nt3/apple-docs-mcp.git
+cd apple-docs-mcp
+pnpm install --frozen-lockfile
+pnpm run build
+```
+
+`pnpm run build` 会运行 `tsc` 并将打包的 WWDC 语料库复制到 `dist/`。编译后的入口点是 `dist/index.js`。
+
+### 2. 接入您的 MCP 主机
+
+将 `/absolute/path/to/apple-docs-mcp` 替换为您克隆到的路径。
+
+**Claude Desktop** — `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) 或 `%APPDATA%\Claude\claude_desktop_config.json` (Windows)：
 
 ```json
 {
   "mcpServers": {
     "apple-docs": {
-      "command": "npx",
-      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
     }
   }
 }
 ```
 
-> **注意**: 如果遇到使用旧版本的问题，添加 `@latest` 以强制使用最新版本：
-> ```json
-> "args": ["-y", "@adv3nt3/apple-docs-mcp@latest"]
-> ```
-
-重启 Claude Desktop 并开始询问 Apple API！
+重启 Claude Desktop 并开始询问 Apple API。
 
 ## 📦 安装指南
+
+下面的每个主机都使用相同的模式：将 `command: "node"` 指向您本地 `dist/index.js` 的绝对路径。
 
 <details>
 <summary><strong>📱 Claude Code</strong></summary>
 
 ```bash
-claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
+claude mcp add apple-docs -- node /absolute/path/to/apple-docs-mcp/dist/index.js
 ```
 
 [📖 Claude Code MCP 文档](https://docs.anthropic.com/en/docs/claude-code/mcp)
@@ -74,8 +83,8 @@ claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
 {
   "mcpServers": {
     "apple-docs": {
-      "command": "npx",
-      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
     }
   }
 }
@@ -96,8 +105,8 @@ claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
     "servers": {
       "apple-docs": {
         "type": "stdio",
-        "command": "npx",
-        "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+        "command": "node",
+        "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
       }
     }
   }
@@ -117,8 +126,8 @@ claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
 {
   "mcpServers": {
     "apple-docs": {
-      "command": "npx",
-      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
     }
   }
 }
@@ -138,8 +147,8 @@ claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
   "context_servers": {
     "Apple Docs": {
       "command": {
-        "path": "npx",
-        "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+        "path": "node",
+        "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
       },
       "settings": {}
     }
@@ -154,18 +163,14 @@ claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
 <details>
 <summary><strong>🔧 Cline</strong></summary>
 
-**通过市场**:
-1. 打开 Cline → 菜单 (☰) → MCP 服务器 → 市场
-2. 搜索 "Apple Docs MCP" → 安装
-
-**通过配置**: 添加到 `cline_mcp_settings.json`:
+添加到 `cline_mcp_settings.json`:
 
 ```json
 {
   "mcpServers": {
     "apple-docs": {
-      "command": "npx",
-      "args": ["-y", "@adv3nt3/apple-docs-mcp"],
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"],
       "disabled": false,
       "autoApprove": []
     }
@@ -176,9 +181,70 @@ claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
 </details>
 
 <details>
+<summary><strong>Amazon Q Developer CLI</strong></summary>
+
+添加到 `~/.aws/amazonq/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "apple-docs": {
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
+    }
+  }
+}
+```
+
+[📖 Amazon Q Developer CLI MCP 文档](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/qdev-mcp.html)
+
+</details>
+
+<details>
 <summary><strong>🪟 Windows</strong></summary>
 
-对于 Windows 系统，使用：
+只要替换路径分隔符，相同的 `node` 调用在 Windows 上也能工作。可以转义反斜杠：
+
+```json
+{
+  "mcpServers": {
+    "apple-docs": {
+      "command": "node",
+      "args": ["C:\\path\\to\\apple-docs-mcp\\dist\\index.js"]
+    }
+  }
+}
+```
+
+……或者使用正斜杠 — Node 两者都接受。
+
+</details>
+
+<details>
+<summary><strong>⚙️ npm 发布后</strong></summary>
+
+下面的片段是为 `@adv3nt3/apple-docs-mcp` 首次发布到 npm 的那一天保留的。**它们目前不工作** — 在该包存在于 registry 之前，`npx` 会返回 404 错误。
+
+**Claude Desktop / Cursor / Windsurf / Cline / Amazon Q / VS Code**（都使用同一模式）：
+
+```json
+{
+  "mcpServers": {
+    "apple-docs": {
+      "command": "npx",
+      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+    }
+  }
+}
+```
+
+**Claude Code**:
+
+```bash
+claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
+```
+
+**Windows**：
 
 ```json
 {
@@ -193,35 +259,10 @@ claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
 }
 ```
 
-</details>
+**全局安装**（发布后）：
 
-<details>
-<summary><strong>⚙️ 高级安装</strong></summary>
-
-**全局安装**:
 ```bash
-# 使用 pnpm（推荐）
-pnpm add -g @adv3nt3/apple-docs-mcp
-
-# 使用 npm
-npm install -g @adv3nt3/apple-docs-mcp
-```
-
-**直接使用**:
-```bash
-npx @adv3nt3/apple-docs-mcp --help
-```
-
-**开发环境设置**:
-```bash
-git clone https://github.com/adv3nt3/apple-docs-mcp.git
-cd apple-docs-mcp
-
-# 使用 pnpm（推荐）
-pnpm install && pnpm run build
-
-# 使用 npm
-npm install && npm run build
+pnpm add -g @adv3nt3/apple-docs-mcp   # 或：npm install -g @adv3nt3/apple-docs-mcp
 ```
 
 </details>

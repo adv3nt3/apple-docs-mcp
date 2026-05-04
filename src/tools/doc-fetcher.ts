@@ -1,3 +1,5 @@
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+
 import { apiCache, generateEnhancedCacheKey } from '../utils/cache.js';
 import { convertToJsonApiUrl, isValidAppleDeveloperUrl } from '../utils/url-converter.js';
 import { httpClient } from '../utils/http-client.js';
@@ -79,7 +81,7 @@ function formatJsonDocumentation(
   jsonData: AppleDocJSON,
   originalUrl: string,
   options: EnhancedAnalysisOptions = {},
-): { content: Array<{ type: string; text: string }> } {
+): CallToolResult {
   let content = '';
 
   // Add header with title and status
@@ -318,7 +320,7 @@ export async function fetchAppleDocJson(
   url: string,
   options: EnhancedAnalysisOptions | number = {},
   maxDepth: number = RECURSION_LIMITS.MAX_DOC_FETCH_DEPTH,
-): Promise<any> {
+): Promise<CallToolResult> {
   // Backward compatibility: if second param is number, treat as maxDepth
   if (typeof options === 'number') {
     maxDepth = options;
@@ -346,7 +348,7 @@ export async function fetchAppleDocJson(
     const cacheKey = generateEnhancedCacheKey(jsonApiUrl, options);
 
     // Try to get from cache first
-    const cachedResult = apiCache.get(cacheKey);
+    const cachedResult = apiCache.get<CallToolResult>(cacheKey);
     if (cachedResult) {
       logger.debug(`Cache hit for: ${jsonApiUrl}`);
       return cachedResult;
