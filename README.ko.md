@@ -444,48 +444,21 @@ apple-docs-mcp/
 
 ## ⚙️ 설정
 
-### 🔄 UserAgent 풀 설정
+### 🔄 UserAgent 풀
 
-MCP 서버는 API 안정성을 향상시키기 위한 지능형 UserAgent 로테이션 시스템을 포함합니다:
+서버에는 내장된 Safari User-Agent 문자열 풀(`src/utils/constants.ts` 참조)이 포함되어 있으며 매 요청마다 자동으로 로테이션됩니다. 풀 자체는 런타임에 사용자가 설정할 수 없습니다.
 
-#### 환경 변수
+#### HTTP 헤더 환경 변수
 
-| 변수 | 설명 | 기본값 | 예시 |
-|------|------|--------|------|
-| `USER_AGENT_ROTATION_ENABLED` | 로테이션 활성화/비활성화 | `true` | `true` |
-| `USER_AGENT_POOL_STRATEGY` | 로테이션 전략 | `random` | `smart` |
-| `USER_AGENT_MAX_RETRIES` | 최대 재시도 횟수 | `3` | `5` |
-| `USER_AGENT_POOL_CONFIG` | 커스텀 풀 설정 (JSON) | 내장 에이전트 | 아래 참조 |
+다음 환경 변수(`src/utils/http-client.ts`에서 사용됨)는 외부로 보내는 요청에 첨부되는 헤더를 조정합니다:
 
-#### 커스텀 풀 설정
-
-```bash
-# 커스텀 UserAgent 풀 설정
-export USER_AGENT_POOL_CONFIG='[
-  {"userAgent": "MyApp/1.0 (compatible)", "weight": 3, "maxUsageCount": 1000},
-  {"userAgent": "MyApp/2.0 (advanced)", "weight": 2, "maxUsageCount": 800}
-]'
-
-# 로테이션 전략 설정 (random/sequential/smart)
-export USER_AGENT_POOL_STRATEGY=smart
-
-# 디버깅 활성화
-export NODE_ENV=development
-```
-
-#### 사용 가능한 전략
-
-- **`random`**: 빠른 무작위 선택 (최고 성능)
-- **`sequential`**: 라운드 로빈 로테이션 (예측 가능한 순서)
-- **`smart`**: 성공률 최적화 (최고 안정성)
-
-#### 내장 UserAgent
-
-서버에는 다음을 포함하는 12개 이상의 사전 구성된 UserAgent 문자열이 포함됩니다:
-- Chrome (Mac Intel/Apple Silicon, Windows, Linux)
-- Firefox (Mac Intel/Apple Silicon, Windows, Linux)
-- Safari (Mac Intel/Apple Silicon, 최신 버전)
-- Edge (Windows, Mac Intel/Apple Silicon)
+| 변수 | 설명 | 기본값 |
+|------|------|--------|
+| `DISABLE_SEC_FETCH` | `true`로 설정 시 `Sec-Fetch-*` 헤더를 생략 | `false` |
+| `DISABLE_DNT` | `true`로 설정 시 `DNT` 헤더를 생략 | `false` |
+| `DISABLE_LANGUAGE_ROTATION` | `true`로 설정 시 `Accept-Language` 로테이션 비활성화 | `false` |
+| `SIMPLE_HEADERS_MODE` | `true`로 설정 시 최소 헤더 세트 전송 | `false` |
+| `DEFAULT_ACCEPT_LANGUAGE` | 기본 `Accept-Language` 값 재정의 | `en-US,en;q=0.9` |
 
 ## 🧪 개발
 
