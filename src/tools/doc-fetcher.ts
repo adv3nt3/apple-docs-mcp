@@ -4,7 +4,7 @@ import { httpClient } from '../utils/http-client.js';
 import type { AppleDocJSON } from '../types/apple-docs.js';
 import type { ContentSection, ContentItem } from '../types/content-sections.js';
 import { logger } from '../utils/logger.js';
-import { PROCESSING_LIMITS } from '../utils/constants.js';
+import { PROCESSING_LIMITS, RECURSION_LIMITS } from '../utils/constants.js';
 import {
   formatDocumentHeader,
   formatDocumentAbstract,
@@ -256,12 +256,17 @@ interface EnhancedAnalysisOptions {
 export async function fetchAppleDocJson(
   url: string,
   options: EnhancedAnalysisOptions | number = {},
-  maxDepth: number = 2,
+  maxDepth: number = RECURSION_LIMITS.MAX_DOC_FETCH_DEPTH,
 ): Promise<any> {
   // Backward compatibility: if second param is number, treat as maxDepth
   if (typeof options === 'number') {
     maxDepth = options;
     options = {};
+  }
+  // Defensive clamp: ensure recursion stays within the documented ceiling
+  // even if a caller passes an out-of-range value.
+  if (maxDepth < 0 || maxDepth > RECURSION_LIMITS.MAX_DOC_FETCH_DEPTH) {
+    maxDepth = RECURSION_LIMITS.MAX_DOC_FETCH_DEPTH;
   }
   try {
     // Validate that this is an Apple Developer URL
