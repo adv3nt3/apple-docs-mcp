@@ -84,7 +84,7 @@ export function getPreloadStats(): {
   preloadedFrameworks: string[];
   totalCached: number;
   cacheHitRate: string;
-  } {
+} {
   const stats = indexCache.getStats();
   const preloadedFrameworks = POPULAR_FRAMEWORKS.filter(framework => {
     const cacheKey = `framework-index-${framework}`;

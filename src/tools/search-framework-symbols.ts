@@ -1,51 +1,8 @@
-import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { indexCache, generateUrlCacheKey } from '../utils/cache.js';
 import { APPLE_URLS, API_LIMITS, PROCESSING_LIMITS } from '../utils/constants.js';
 import { httpClient } from '../utils/http-client.js';
 import { logger } from '../utils/logger.js';
 import { normalizeFrameworkName } from '../utils/framework-mapper.js';
-
-/**
- * MCP Tool Definition
- */
-export const searchFrameworkSymbolsTool: Tool = {
-  name: 'search_framework_symbols',
-  description: 'Browse and search symbols within a specific Apple framework. Perfect for exploring framework APIs, finding all views/controllers/delegates in a framework, or discovering available types. Use after list_technologies to get framework identifiers.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      framework: {
-        type: 'string',
-        description: 'Framework identifier in lowercase. Common: "uikit", "swiftui", "foundation", "combine", "coredata". Get exact names from list_technologies. Example: "swiftui" for SwiftUI framework.',
-      },
-      symbolType: {
-        type: 'string',
-        enum: ['all', 'class', 'struct', 'enum', 'protocol', 'method', 'property', 'init', 'func', 'var', 'let', 'typealias'],
-        description: 'Filter by symbol type. Use "class" for UIViewController subclasses, "protocol" for delegates, "struct" for value types. Default: "all" shows everything.',
-      },
-      namePattern: {
-        type: 'string',
-        description: 'Filter by name pattern. Use "*View" for all views, "UI*" for UI-prefixed symbols, "*Delegate" for delegates. Case-sensitive. Leave empty for all symbols.',
-      },
-      language: {
-        type: 'string',
-        enum: ['swift', 'occ'],
-        description: 'Language preference. Some APIs differ between Swift and Objective-C. Default: "swift"',
-      },
-      limit: {
-        type: 'number',
-        description: `Results limit (default: ${API_LIMITS.DEFAULT_FRAMEWORK_SYMBOLS_LIMIT}, max: ${API_LIMITS.MAX_FRAMEWORK_SYMBOLS_LIMIT}). Includes nested symbols.`,
-        minimum: 1,
-        maximum: API_LIMITS.MAX_FRAMEWORK_SYMBOLS_LIMIT,
-      },
-    },
-    required: ['framework'],
-  },
-  annotations: {
-    title: 'Search Framework Symbols',
-    readOnlyHint: true,
-  },
-};
 
 interface IndexItem {
   path: string;

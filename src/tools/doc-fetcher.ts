@@ -170,7 +170,7 @@ function formatSpecificAPIContent(jsonData: AppleDocJSON): string {
               content += `**${param.name}**: `;
               if (param.content?.[0]?.inlineContent) {
                 const paramDesc = param.content[0].inlineContent
-                  .map((inline) => (inline as { text?: string })?.text ?? '')
+                  .map((inline) => (inline)?.text ?? '')
                   .join('');
                 content += `${paramDesc}\n\n`;
               }
@@ -343,7 +343,7 @@ export async function fetchAppleDocJson(
     }
 
     // Generate cache key including options
-    const cacheKey = generateEnhancedCacheKey(jsonApiUrl, options as any);
+    const cacheKey = generateEnhancedCacheKey(jsonApiUrl, options);
 
     // Try to get from cache first
     const cachedResult = apiCache.get(cacheKey);
