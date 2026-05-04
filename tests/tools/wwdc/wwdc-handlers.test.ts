@@ -2,14 +2,12 @@
  * Tests for WWDC handlers
  */
 
-import {
-  handleListWWDCVideos,
-  handleSearchWWDCContent,
-  handleGetWWDCVideo,
-  handleGetWWDCCodeExamples,
-  handleBrowseWWDCTopics,
-  handleFindRelatedWWDCVideos,
-} from '../../../src/tools/wwdc/wwdc-handlers';
+import { handleListWWDCVideos } from '../../../src/tools/wwdc/list-videos';
+import { handleSearchWWDCContent } from '../../../src/tools/wwdc/search-content';
+import { handleGetWWDCVideo } from '../../../src/tools/wwdc/get-video';
+import { handleGetWWDCCodeExamples } from '../../../src/tools/wwdc/get-code-examples';
+import { handleBrowseWWDCTopics } from '../../../src/tools/wwdc/browse-topics';
+import { handleFindRelatedWWDCVideos } from '../../../src/tools/wwdc/find-related-videos';
 
 // Mock the data source module
 jest.mock('../../../src/utils/wwdc-data-source', () => ({

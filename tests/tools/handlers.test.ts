@@ -29,14 +29,26 @@ jest.mock('../../src/tools/get-sample-code.js');
 // Mock wwdc-data-source to avoid import.meta.url issues
 jest.mock('../../src/utils/wwdc-data-source.js');
 
-// Mock WWDC handlers
-jest.mock('../../src/tools/wwdc/wwdc-handlers.js', () => ({
+// Mock WWDC handlers (one file per handler post-split)
+jest.mock('../../src/tools/wwdc/list-videos.js', () => ({
   handleListWWDCVideos: jest.fn().mockResolvedValue('WWDC Videos'),
+}));
+jest.mock('../../src/tools/wwdc/search-content.js', () => ({
   handleSearchWWDCContent: jest.fn().mockResolvedValue('WWDC Search Results'),
+}));
+jest.mock('../../src/tools/wwdc/get-video.js', () => ({
   handleGetWWDCVideo: jest.fn().mockResolvedValue('WWDC Video Details'),
+}));
+jest.mock('../../src/tools/wwdc/get-code-examples.js', () => ({
   handleGetWWDCCodeExamples: jest.fn().mockResolvedValue('WWDC Code Examples'),
+}));
+jest.mock('../../src/tools/wwdc/browse-topics.js', () => ({
   handleBrowseWWDCTopics: jest.fn().mockResolvedValue('WWDC Topics'),
+}));
+jest.mock('../../src/tools/wwdc/find-related-videos.js', () => ({
   handleFindRelatedWWDCVideos: jest.fn().mockResolvedValue('Related WWDC Videos'),
+}));
+jest.mock('../../src/tools/wwdc/list-years.js', () => ({
   handleListWWDCYears: jest.fn().mockResolvedValue('WWDC Years'),
 }));
 
