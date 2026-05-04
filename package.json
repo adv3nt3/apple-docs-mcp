@@ -36,9 +36,9 @@
     "test:coverage": "jest --coverage",
     "test:ci": "jest --ci --coverage --watchAll=false",
     "prepublishOnly": "pnpm run clean && pnpm run build && pnpm run test:ci",
-    "release:patch": "npm version patch && git push origin main --tags && npm publish",
-    "release:minor": "npm version minor && git push origin main --tags && npm publish",
-    "release:major": "npm version major && git push origin main --tags && npm publish"
+    "release:patch": "npm version patch && git push origin main --tags && npm publish --provenance --access public",
+    "release:minor": "npm version minor && git push origin main --tags && npm publish --provenance --access public",
+    "release:major": "npm version major && git push origin main --tags && npm publish --provenance --access public"
   },
   "keywords": [
     "mcp",
