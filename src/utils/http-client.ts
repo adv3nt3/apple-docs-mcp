@@ -240,7 +240,7 @@ class HttpClient {
         }
 
         if (!response?.ok) {
-          if (response && response.status === 404) {
+          if (response?.status === 404) {
             throw new Error(`${ERROR_MESSAGES.NOT_FOUND} (${response.status})`);
           }
           if (response && response.status >= 500 && attempt < retries) {

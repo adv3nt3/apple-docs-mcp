@@ -110,7 +110,7 @@ export function getCacheWarmUpStatus(): {
   overviewsCacheSize: number;
   apiCacheSize: number;
   totalCacheEntries: number;
-  } {
+} {
   const techStats = technologiesCache.getStats();
   const updatesStats = updatesCache.getStats();
   const overviewsStats = technologyOverviewsCache.getStats();

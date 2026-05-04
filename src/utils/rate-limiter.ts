@@ -38,7 +38,7 @@ export class RateLimiter {
     maxRequests: number;
     windowMs: number;
     utilizationRate: string;
-    } {
+  } {
     const now = Date.now();
     this.requests = this.requests.filter(time => now - time < this.windowMs);
 

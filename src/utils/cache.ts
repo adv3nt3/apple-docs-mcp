@@ -122,7 +122,7 @@ export class MemoryCache {
     hitRate: string;
     hits: number;
     misses: number;
-    } {
+  } {
     const total = this.hits + this.misses;
     const hitRate = total > 0 ? (this.hits / total * 100).toFixed(2) + '%' : '0.00%';
 

@@ -173,7 +173,7 @@ export async function runGetAppleDocContent(
         includePlatformAnalysis,
       },
       RECURSION_LIMITS.MAX_DOC_FETCH_DEPTH,
-    ) as unknown as CallToolResult;
+    );
   } catch (error) {
     if (error && typeof error === 'object' && 'type' in error) {
       return createToolErrorResponse(error as AppError, 'get_apple_doc_content') as unknown as CallToolResult;
