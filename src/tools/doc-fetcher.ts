@@ -1,5 +1,5 @@
 import { apiCache, generateEnhancedCacheKey } from '../utils/cache.js';
-import { convertToJsonApiUrl } from '../utils/url-converter.js';
+import { convertToJsonApiUrl, isValidAppleDeveloperUrl } from '../utils/url-converter.js';
 import { httpClient } from '../utils/http-client.js';
 import type { AppleDocJSON } from '../types/apple-docs.js';
 import type { ContentSection, ContentItem } from '../types/content-sections.js';
@@ -265,7 +265,7 @@ export async function fetchAppleDocJson(
   }
   try {
     // Validate that this is an Apple Developer URL
-    if (!url.includes('developer.apple.com')) {
+    if (!isValidAppleDeveloperUrl(url)) {
       throw new Error('URL must be from developer.apple.com');
     }
 

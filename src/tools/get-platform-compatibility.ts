@@ -1,7 +1,8 @@
-import { convertToJsonApiUrl } from '../utils/url-converter.js';
+import { convertToJsonApiUrl, isValidAppleDeveloperUrl } from '../utils/url-converter.js';
 import { httpClient } from '../utils/http-client.js';
 import { logger } from '../utils/logger.js';
 import { PROCESSING_LIMITS } from '../utils/constants.js';
+import { ErrorType } from '../utils/error-handler.js';
 
 /**
  * 平台兼容性信息接口
@@ -50,6 +51,9 @@ export async function handleGetPlatformCompatibility(
   compareMode: string = 'single',
   includeRelated: boolean = false,
 ): Promise<string> {
+  if (!isValidAppleDeveloperUrl(apiUrl)) {
+    throw { type: ErrorType.INVALID_INPUT, message: 'URL must be from developer.apple.com' };
+  }
   try {
     logger.info(`Analyzing platform compatibility for: ${apiUrl}`);
 
