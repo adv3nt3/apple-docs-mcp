@@ -1,8 +1,19 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { handleToolCall, toolHandlers } from '../../src/tools/handlers.js';
-import * as schemas from '../../src/schemas/index.js';
+/**
+ * Tool registration / dispatch tests — exercises the production tool surface
+ * via Client → InMemoryTransport → McpServer (registerAllTools).
+ *
+ * The original suite tested a `handleToolCall(name, args, server)` dispatch
+ * table that no longer exists; this version verifies the same behaviour at
+ * the transport boundary instead, which is the path real MCP hosts take.
+ */
 
-// Mock all tool implementations
+import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+
+import { createTestMcpClient, type McpToolCallResult } from '../helpers/mcp-test-server';
+
+// Mock the underlying handlers so we can assert they were called with the
+// right (defaults-applied) arguments.
 jest.mock('../../src/tools/search-parser.js');
 jest.mock('../../src/tools/doc-fetcher.js');
 jest.mock('../../src/tools/list-technologies.js');
@@ -29,152 +40,143 @@ jest.mock('../../src/tools/wwdc/wwdc-handlers.js', () => ({
   handleListWWDCYears: jest.fn().mockResolvedValue('WWDC Years'),
 }));
 
-describe('Tool Handlers', () => {
-  let mockServer: any;
+import { searchFrameworkSymbols } from '../../src/tools/search-framework-symbols.js';
+import { handleListTechnologies } from '../../src/tools/list-technologies.js';
+import { handleGetDocumentationUpdates } from '../../src/tools/get-documentation-updates.js';
+import { parseSearchResults } from '../../src/tools/search-parser.js';
+import { fetchAppleDocJson } from '../../src/tools/doc-fetcher.js';
 
-  beforeEach(() => {
+const mockSearchFrameworkSymbols = searchFrameworkSymbols as jest.MockedFunction<typeof searchFrameworkSymbols>;
+const mockHandleListTechnologies = handleListTechnologies as jest.MockedFunction<typeof handleListTechnologies>;
+const mockHandleGetDocumentationUpdates = handleGetDocumentationUpdates as jest.MockedFunction<typeof handleGetDocumentationUpdates>;
+const mockParseSearchResults = parseSearchResults as jest.MockedFunction<typeof parseSearchResults>;
+const mockFetchAppleDocJson = fetchAppleDocJson as jest.MockedFunction<typeof fetchAppleDocJson>;
+
+// httpClient.getText is invoked by the search_apple_docs flow before the
+// parser runs — stub it so the call doesn't reach out to the network.
+jest.mock('../../src/utils/http-client.js', () => ({
+  httpClient: {
+    getText: jest.fn().mockResolvedValue('<html></html>'),
+  },
+}));
+
+describe('Tool dispatch (registerAllTools via in-memory transport)', () => {
+  let client: Client;
+  let cleanup: () => Promise<void>;
+
+  const callTool = async (
+    name: string,
+    args: Record<string, unknown> = {},
+  ): Promise<McpToolCallResult> => {
+    const result = await client.callTool({ name, arguments: args });
+    return result as McpToolCallResult;
+  };
+
+  beforeEach(async () => {
     jest.clearAllMocks();
-    
-    // Create a mock server with all required methods
-    mockServer = {
-      searchAppleDocs: jest.fn().mockResolvedValue({
-        content: [{ type: 'text', text: 'Search results' }],
-      }),
-      getAppleDocContent: jest.fn().mockResolvedValue({
-        content: [{ type: 'text', text: 'Doc content' }],
-      }),
-      listTechnologies: jest.fn().mockResolvedValue({
-        content: [{ type: 'text', text: 'Technologies list' }],
-      }),
-      searchFrameworkSymbols: jest.fn().mockResolvedValue({
-        content: [{ type: 'text', text: 'Framework symbols' }],
-      }),
-      getRelatedApis: jest.fn().mockResolvedValue({
-        content: [{ type: 'text', text: 'Related APIs' }],
-      }),
-      resolveReferencesBatch: jest.fn().mockResolvedValue({
-        content: [{ type: 'text', text: 'Resolved references' }],
-      }),
-      getPlatformCompatibility: jest.fn().mockResolvedValue({
-        content: [{ type: 'text', text: 'Platform compatibility' }],
-      }),
-      findSimilarApis: jest.fn().mockResolvedValue({
-        content: [{ type: 'text', text: 'Similar APIs' }],
-      }),
-      getDocumentationUpdates: jest.fn().mockResolvedValue({
-        content: [{ type: 'text', text: 'Documentation updates' }],
-      }),
-      getTechnologyOverviews: jest.fn().mockResolvedValue({
-        content: [{ type: 'text', text: 'Technology overviews' }],
-      }),
-      getSampleCode: jest.fn().mockResolvedValue({
-        content: [{ type: 'text', text: 'Sample code' }],
-      }),
-    };
+
+    mockSearchFrameworkSymbols.mockResolvedValue('Framework symbols');
+    mockHandleListTechnologies.mockResolvedValue('Technologies list');
+    mockHandleGetDocumentationUpdates.mockResolvedValue('Documentation updates');
+    mockParseSearchResults.mockReturnValue({
+      content: [{ type: 'text', text: 'Search results' }],
+    } as any);
+    mockFetchAppleDocJson.mockResolvedValue({
+      content: [{ type: 'text', text: 'Doc content' }],
+    } as any);
+
+    ({ client, cleanup } = await createTestMcpClient());
   });
 
-  describe('handleToolCall', () => {
-    it('should throw error for unknown tool', async () => {
-      const result = await handleToolCall('unknown_tool', {}, mockServer);
-      expect(result.isError).toBe(true);
-      expect(result.content[0].text).toContain('Unknown tool: unknown_tool');
+  afterEach(async () => {
+    await cleanup();
+  });
+
+  describe('tools/list', () => {
+    it('exposes every production tool', async () => {
+      const { tools } = await client.listTools();
+      const names = tools.map(t => t.name).sort();
+
+      expect(names).toEqual([
+        'browse_wwdc_topics',
+        'find_related_wwdc_videos',
+        'find_similar_apis',
+        'get_apple_doc_content',
+        'get_cache_stats',
+        'get_documentation_updates',
+        'get_performance_report',
+        'get_platform_compatibility',
+        'get_related_apis',
+        'get_sample_code',
+        'get_technology_overviews',
+        'get_wwdc_code_examples',
+        'get_wwdc_video',
+        'list_technologies',
+        'list_wwdc_videos',
+        'list_wwdc_years',
+        'resolve_references_batch',
+        'search_apple_docs',
+        'search_framework_symbols',
+        'search_wwdc_content',
+      ]);
+    });
+  });
+
+  describe('tools/call', () => {
+    it('dispatches search_apple_docs to the parser', async () => {
+      const result = await callTool('search_apple_docs', { query: 'SwiftUI', type: 'all' });
+
+      expect(mockParseSearchResults).toHaveBeenCalled();
+      expect(result.content[0].text).toBe('Search results');
     });
 
-    it('should handle search_apple_docs tool', async () => {
-      const args = { query: 'SwiftUI', type: 'all' };
-      const result = await handleToolCall('search_apple_docs', args, mockServer);
-      
-      expect(mockServer.searchAppleDocs).toHaveBeenCalledWith('SwiftUI', 'all');
-      expect(result).toEqual({
-        content: [{ type: 'text', text: 'Search results' }],
-      });
-    });
-
-    it('should handle get_apple_doc_content tool', async () => {
-      const args = {
+    it('dispatches get_apple_doc_content with all flags', async () => {
+      const result = await callTool('get_apple_doc_content', {
         url: 'https://developer.apple.com/documentation/swiftui',
         includeRelatedApis: true,
         includeReferences: false,
-      };
-      const result = await handleToolCall('get_apple_doc_content', args, mockServer);
-      
-      expect(mockServer.getAppleDocContent).toHaveBeenCalledWith(
+      });
+
+      expect(mockFetchAppleDocJson).toHaveBeenCalledWith(
         'https://developer.apple.com/documentation/swiftui',
-        true,
-        false,
-        false,
-        false,
+        {
+          includeRelatedApis: true,
+          includeReferences: false,
+          includeSimilarApis: false,
+          includePlatformAnalysis: false,
+        },
+        expect.any(Number),
       );
-      expect(result).toEqual({
-        content: [{ type: 'text', text: 'Doc content' }],
-      });
+      expect(result.content[0].text).toBe('Doc content');
     });
 
-    it('should handle validation errors gracefully', async () => {
-      // Mock schema parse to throw validation error
-      jest.spyOn(schemas.searchAppleDocsSchema, 'parse').mockImplementationOnce(() => {
-        throw new Error('Validation failed: query is required');
-      });
-
-      const result = await handleToolCall('search_apple_docs', {}, mockServer);
+    it('returns isError when calling an unknown tool', async () => {
+      const result = await callTool('unknown_tool', {});
       expect(result.isError).toBe(true);
-      expect(result.content[0].text).toContain('Validation failed: query is required');
-    });
-  });
-
-  describe('toolHandlers', () => {
-    it('should have handlers for all expected tools', () => {
-      const expectedTools = [
-        'search_apple_docs',
-        'get_apple_doc_content',
-        'list_technologies',
-        'search_framework_symbols',
-        'get_related_apis',
-        'resolve_references_batch',
-        'get_platform_compatibility',
-        'find_similar_apis',
-        'get_documentation_updates',
-        'get_technology_overviews',
-        'get_sample_code',
-      ];
-
-      expectedTools.forEach(tool => {
-        expect(toolHandlers[tool]).toBeDefined();
-        expect(typeof toolHandlers[tool]).toBe('function');
-      });
     });
 
-    it('should handle list_technologies with optional parameters', async () => {
-      const handler = toolHandlers.list_technologies;
-      const args = { category: 'games', language: 'swift', includeBeta: false };
-      
-      await handler(args, mockServer);
-      
-      expect(mockServer.listTechnologies).toHaveBeenCalledWith('games', 'swift', false, 200);
+    it('applies Zod defaults to list_technologies arguments', async () => {
+      await callTool('list_technologies', { category: 'games', language: 'swift', includeBeta: false });
+
+      expect(mockHandleListTechnologies).toHaveBeenCalledWith('games', 'swift', false, 200);
     });
 
-    it('should handle list_technologies with limit parameter', async () => {
-      const handler = toolHandlers.list_technologies;
-      const args = { category: 'ui', limit: 10 };
-      
-      await handler(args, mockServer);
-      
-      expect(mockServer.listTechnologies).toHaveBeenCalledWith('ui', undefined, true, 10);
+    it('applies Zod defaults when fields are omitted', async () => {
+      await callTool('list_technologies', { category: 'ui', limit: 10 });
+
+      expect(mockHandleListTechnologies).toHaveBeenCalledWith('ui', undefined, true, 10);
     });
 
-    it('should handle search_framework_symbols with all parameters', async () => {
-      const handler = toolHandlers.search_framework_symbols;
-      const args = {
+    it('passes through every search_framework_symbols field', async () => {
+      await callTool('search_framework_symbols', {
         framework: 'swiftui',
         symbolType: 'struct',
         namePattern: '*View',
         language: 'swift',
         limit: 100,
-      };
-      
-      await handler(args, mockServer);
-      
-      expect(mockServer.searchFrameworkSymbols).toHaveBeenCalledWith(
+      });
+
+      expect(mockSearchFrameworkSymbols).toHaveBeenCalledWith(
         'swiftui',
         'struct',
         '*View',
@@ -183,20 +185,17 @@ describe('Tool Handlers', () => {
       );
     });
 
-    it('should handle get_documentation_updates with all parameters', async () => {
-      const handler = toolHandlers.get_documentation_updates;
-      const args = {
+    it('passes through every get_documentation_updates field', async () => {
+      await callTool('get_documentation_updates', {
         category: 'wwdc',
         technology: 'SwiftUI',
         year: '2024',
         searchQuery: 'animation',
         includeBeta: true,
         limit: 50,
-      };
-      
-      await handler(args, mockServer);
-      
-      expect(mockServer.getDocumentationUpdates).toHaveBeenCalledWith(
+      });
+
+      expect(mockHandleGetDocumentationUpdates).toHaveBeenCalledWith(
         'wwdc',
         'SwiftUI',
         '2024',

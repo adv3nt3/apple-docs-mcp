@@ -63,14 +63,16 @@ jest.mock('../../src/utils/cache.js', () => ({
   generateEnhancedCacheKey: jest.fn().mockReturnValue('test-enhanced-cache-key')
 }));
 
-// Import the server after mocks are set up
-import AppleDeveloperDocsMCPServer from '../../src/index.js';
+// Import the runner after mocks are set up. Pre-migration this test drove
+// `AppleDeveloperDocsMCPServer.getAppleDocContent` directly; post-migration
+// the wrapper method is gone and the same logic lives as a free function in
+// register-tools.ts so it can still be exercised in isolation.
+import { runGetAppleDocContent } from '../../src/tools/register-tools.js';
 
 describe('getAppleDocContent Nested Response Regression Tests', () => {
-  let server: AppleDeveloperDocsMCPServer;
-  
+  const server = { getAppleDocContent: runGetAppleDocContent };
+
   beforeEach(() => {
-    server = new AppleDeveloperDocsMCPServer();
     jest.clearAllMocks();
   });
 
