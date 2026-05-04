@@ -23,6 +23,7 @@ jest.mock('../../src/utils/http-client.js', () => ({
 
 jest.mock('../../src/utils/url-converter.js', () => ({
   convertToJsonApiUrl: jest.fn(),
+  isValidAppleDeveloperUrl: jest.fn(() => true),
 }));
 
 import { apiCache, docCache } from '../../src/utils/cache.js';
@@ -160,8 +161,11 @@ describe('fetchAppleDocJson', () => {
 
       const result = await fetchAppleDocJson(mockDocUrl);
 
+      // Security fix M4: raw error.message is no longer leaked into the
+      // user-visible response — only the generic prefix is emitted.
       expect(result.isError).toBe(true);
-      expect(result.content[0].text).toContain('Error: Failed to get Apple doc content: Network error');
+      expect(result.content[0].text).toContain('Error: Failed to get Apple doc content');
+      expect(result.content[0].text).not.toContain('Network error');
     });
 
     it('should handle 404 errors', async () => {
@@ -170,8 +174,10 @@ describe('fetchAppleDocJson', () => {
 
       const result = await fetchAppleDocJson(mockDocUrl);
 
+      // Security fix M4: raw error.message is no longer leaked.
       expect(result.isError).toBe(true);
-      expect(result.content[0].text).toContain('Error: Failed to get Apple doc content: 404 Not Found');
+      expect(result.content[0].text).toContain('Error: Failed to get Apple doc content');
+      expect(result.content[0].text).not.toContain('404 Not Found');
     });
 
     it('should handle malformed JSON', async () => {

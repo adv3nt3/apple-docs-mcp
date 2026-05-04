@@ -27,7 +27,7 @@ function sanitizeText(s: string | undefined | null, maxLen = 500): string {
   const cleaned = String(s)
     // eslint-disable-next-line no-control-regex
     .replace(/[\x00-\x08\x0B-\x1F\x7F]/g, '')
-    .replace(/[​-‍﻿]/g, '');
+    .replace(/[\u200B-\u200D\uFEFF]/g, '');
   if (cleaned.length > maxLen) {
     return cleaned.slice(0, maxLen) + '…';
   }
