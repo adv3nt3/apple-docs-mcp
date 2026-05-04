@@ -13,7 +13,63 @@ import {
   isSpecificAPIDocument,
 } from './doc-formatter.js';
 
+/**
+ * Sanitize text extracted from third-party (Apple) JSON before embedding into
+ * markdown that becomes LLM context. Strips ASCII control chars (except \n/\t)
+ * and zero-width characters that could be used for prompt injection or to
+ * smuggle invisible content, and caps length to bound context bloat.
+ */
+function sanitizeText(s: string | undefined | null, maxLen = 500): string {
+  if (s === undefined || s === null) {
+    return '';
+  }
+  const cleaned = String(s)
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\x00-\x08\x0B-\x1F\x7F]/g, '')
+    .replace(/[​-‍﻿]/g, '');
+  if (cleaned.length > maxLen) {
+    return cleaned.slice(0, maxLen) + '…';
+  }
+  return cleaned;
+}
 
+/**
+ * Build a documentation URL from an Apple identifier path by URL-encoding each
+ * segment. Prevents identifier-derived characters (parentheses, spaces, etc.)
+ * from breaking out of a markdown link target.
+ */
+function safeApiUrlFromIdentifier(identifier: string): string {
+  const path = identifier.replace('doc://com.apple.SwiftUI/documentation/', '');
+  const encoded = path
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/');
+  return `https://developer.apple.com/documentation/${encoded}`;
+}
+
+/**
+ * Validate a reference URL coming from third-party JSON before using it as a
+ * markdown link target. Absolute URLs must point at developer.apple.com;
+ * relative URLs are prefixed onto developer.apple.com; missing values return
+ * the inert placeholder '#'.
+ */
+function safeRefUrl(url: string | undefined | null): string {
+  if (!url) {
+    return '#';
+  }
+  if (url.startsWith('http')) {
+    try {
+      const parsed = new URL(url);
+      if (parsed.hostname === 'developer.apple.com') {
+        return url;
+      }
+      return '#';
+    } catch {
+      return '#';
+    }
+  }
+  return `https://developer.apple.com${url}`;
+}
 
 /**
  * Format JSON documentation content with enhanced analysis
@@ -102,7 +158,7 @@ function formatSpecificAPIContent(jsonData: AppleDocJSON): string {
             const declaration = typedSection.declarations[0].tokens
               .map((token) => token.text ?? '')
               .join('');
-            content += `\`\`\`swift\n${declaration}\`\`\`\n\n`;
+            content += `\`\`\`swift\n${sanitizeText(declaration, 2000)}\`\`\`\n\n`;
           }
           break;
 
@@ -126,7 +182,7 @@ function formatSpecificAPIContent(jsonData: AppleDocJSON): string {
             typedSection.content.forEach((item) => {
               const contentItem = item as ContentItem;
               if (contentItem.type === 'heading') {
-                content += `## ${contentItem.text}\n\n`;
+                content += `## ${sanitizeText(contentItem.text, 200)}\n\n`;
               } else if (contentItem.type === 'paragraph' && contentItem.inlineContent) {
                 const paragraphText = contentItem.inlineContent
                   .map((inline: any) => {
@@ -141,11 +197,14 @@ function formatSpecificAPIContent(jsonData: AppleDocJSON): string {
                     return '';
                   })
                   .join('');
-                if (paragraphText.trim()) {
-                  content += `${paragraphText}\n\n`;
+                const safeParagraph = sanitizeText(paragraphText, 2000);
+                if (safeParagraph.trim()) {
+                  content += `${safeParagraph}\n\n`;
                 }
               } else if (contentItem.type === 'codeListing' && (contentItem as any).code) {
-                content += `\`\`\`${(contentItem as any).syntax ?? 'swift'}\n${(contentItem as any).code.join('\n')}\`\`\`\n\n`;
+                const codeText = (contentItem as any).code.join('\n');
+                const syntax = sanitizeText((contentItem as any).syntax ?? 'swift', 32);
+                content += `\`\`\`${syntax}\n${sanitizeText(codeText, 4000)}\`\`\`\n\n`;
               }
             });
           }
@@ -183,8 +242,9 @@ function formatAPICollectionContent(jsonData: AppleDocJSON): string {
                 return '';
               })
               .join('');
-            if (paragraphText.trim()) {
-              content += `${paragraphText}\n\n`;
+            const safeParagraph = sanitizeText(paragraphText, 2000);
+            if (safeParagraph.trim()) {
+              content += `${safeParagraph}\n\n`;
             }
           } else if (item.type === 'unorderedList' && item.items) {
             item.items.forEach((listItem: any) => {
@@ -200,8 +260,9 @@ function formatAPICollectionContent(jsonData: AppleDocJSON): string {
                     return '';
                   })
                   .join('');
-                if (listText.trim()) {
-                  content += `- ${listText}\n`;
+                const safeListText = sanitizeText(listText, 1000);
+                if (safeListText.trim()) {
+                  content += `- ${safeListText}\n`;
                 }
               }
             });
@@ -222,10 +283,9 @@ function formatAPICollectionContent(jsonData: AppleDocJSON): string {
 
         section.identifiers.forEach((identifier: string) => {
           // Extract the API name from the identifier
-          const apiName = identifier.split('/').pop() ?? identifier;
-          // Create a documentation URL for the API
-          const apiPath = identifier.replace('doc://com.apple.SwiftUI/documentation/', '');
-          const apiUrl = `https://developer.apple.com/documentation/${apiPath}`;
+          const apiName = sanitizeText(identifier.split('/').pop() ?? identifier, 200);
+          // Create a documentation URL for the API (URL-encode each path segment)
+          const apiUrl = safeApiUrlFromIdentifier(identifier);
           content += `- [\`${apiName}\`](${apiUrl})\n`;
         });
         content += '\n';
@@ -363,9 +423,9 @@ function extractRelatedApis(jsonData: AppleDocJSON): Array<{title: string, url: 
           if (jsonData.references?.[identifier]) {
             const ref = jsonData.references[identifier];
             relatedApis.push({
-              title: ref.title ?? 'Unknown',
-              url: ref.url ? (ref.url.startsWith('http') ? ref.url : `https://developer.apple.com${ref.url}`) : '#',
-              relationship: section.title ?? 'Related',
+              title: sanitizeText(ref.title, 200) || 'Unknown',
+              url: safeRefUrl(ref.url),
+              relationship: sanitizeText(section.title, 200) || 'Related',
             });
           }
         }
@@ -381,9 +441,9 @@ function extractRelatedApis(jsonData: AppleDocJSON): Array<{title: string, url: 
           if (jsonData.references?.[identifier]) {
             const ref = jsonData.references[identifier];
             relatedApis.push({
-              title: ref.title ?? 'Unknown',
-              url: ref.url ? (ref.url.startsWith('http') ? ref.url : `https://developer.apple.com${ref.url}`) : '#',
-              relationship: `See Also: ${section.title ?? 'Related'}`,
+              title: sanitizeText(ref.title, 200) || 'Unknown',
+              url: safeRefUrl(ref.url),
+              relationship: `See Also: ${sanitizeText(section.title, 200) || 'Related'}`,
             });
           }
         }
@@ -404,13 +464,14 @@ function extractReferences(jsonData: AppleDocJSON): Array<{title: string, url: s
     const refEntries = Object.entries(jsonData.references).slice(0, PROCESSING_LIMITS.MAX_DOC_FETCHER_REFERENCES); // Limit
 
     for (const [, ref] of refEntries) {
+      const rawAbstract = ref.abstract
+        ? ref.abstract.map((a) => (a as { text?: string })?.text ?? '').join(' ').trim()
+        : undefined;
       references.push({
-        title: ref.title ?? 'Unknown',
-        url: ref.url ? (ref.url.startsWith('http') ? ref.url : `https://developer.apple.com${ref.url}`) : '#',
-        type: ref.role ?? ref.kind ?? 'unknown',
-        abstract: ref.abstract
-          ? ref.abstract.map((a) => (a as { text?: string })?.text ?? '').join(' ').trim()
-          : undefined,
+        title: sanitizeText(ref.title, 200) || 'Unknown',
+        url: safeRefUrl(ref.url),
+        type: sanitizeText(ref.role ?? ref.kind, 64) || 'unknown',
+        abstract: rawAbstract ? sanitizeText(rawAbstract, 500) : undefined,
       });
     }
   }
@@ -432,9 +493,9 @@ function extractSimilarApis(jsonData: AppleDocJSON): Array<{title: string, url: 
           if (jsonData.references?.[identifier]) {
             const ref = jsonData.references[identifier];
             similarApis.push({
-              title: ref.title ?? 'Unknown',
-              url: ref.url ? (ref.url.startsWith('http') ? ref.url : `https://developer.apple.com${ref.url}`) : '#',
-              category: section.title ?? 'Related',
+              title: sanitizeText(ref.title, 200) || 'Unknown',
+              url: safeRefUrl(ref.url),
+              category: sanitizeText(section.title, 200) || 'Related',
             });
           }
         }
