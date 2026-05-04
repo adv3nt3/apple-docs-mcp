@@ -2,6 +2,8 @@
  * URL conversion utilities for Apple Developer Documentation
  */
 
+import { appError, ErrorType } from './error-handler.js';
+
 /**
  * Convert a web URL to a JSON API URL
  * @param webUrl The web URL to convert
@@ -58,6 +60,17 @@ export function isValidAppleDeveloperUrl(url: string): boolean {
     return urlObj.hostname === 'developer.apple.com';
   } catch {
     return false;
+  }
+}
+
+/**
+ * Throws an AppError if the URL isn't on developer.apple.com.
+ * Use at the top of every tool handler that accepts a URL parameter from
+ * the LLM. Closes the SSRF surface (security fix H2).
+ */
+export function assertAppleDeveloperUrl(url: string): void {
+  if (!isValidAppleDeveloperUrl(url)) {
+    throw appError(ErrorType.INVALID_INPUT, 'URL must be from developer.apple.com');
   }
 }
 
