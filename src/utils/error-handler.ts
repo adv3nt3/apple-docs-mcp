@@ -32,6 +32,24 @@ const SAFE_ERROR_MESSAGES: Record<ErrorType, string> = {
 };
 
 /**
+ * Single source of truth for AppError construction. Prefer this factory over
+ * inline `{ type, message, ... }` literals so the shape stays enforced and
+ * future-proof against field additions.
+ */
+export function appError(
+  type: ErrorType,
+  message: string,
+  options: { suggestions?: string[]; originalError?: Error | unknown } = {},
+): AppError {
+  return {
+    type,
+    message,
+    suggestions: options.suggestions,
+    originalError: options.originalError instanceof Error ? options.originalError : undefined,
+  };
+}
+
+/**
  * Create a standardized error response
  */
 export function createErrorResponse(error: AppError): ErrorResponse {
@@ -57,72 +75,60 @@ export function createErrorResponse(error: AppError): ErrorResponse {
  */
 export function handleFetchError(error: unknown, url: string): AppError {
   if (error instanceof TypeError) {
-    return {
-      type: ErrorType.NETWORK_ERROR,
-      message: ERROR_MESSAGES.NETWORK_ERROR,
+    return appError(ErrorType.NETWORK_ERROR, ERROR_MESSAGES.NETWORK_ERROR, {
       originalError: error,
       suggestions: [
         'Check your internet connection',
         'Verify the URL is accessible',
         'Try again in a few moments',
       ],
-    };
+    });
   }
 
   if (error instanceof Error) {
     if (error.message.includes('timeout')) {
-      return {
-        type: ErrorType.TIMEOUT,
-        message: ERROR_MESSAGES.TIMEOUT,
+      return appError(ErrorType.TIMEOUT, ERROR_MESSAGES.TIMEOUT, {
         originalError: error,
         suggestions: [
           'Try again with a simpler query',
           'Check your network connection',
         ],
-      };
+      });
     }
 
     if (error.message.includes('404')) {
-      return {
-        type: ErrorType.NOT_FOUND,
-        message: ERROR_MESSAGES.NOT_FOUND,
+      return appError(ErrorType.NOT_FOUND, ERROR_MESSAGES.NOT_FOUND, {
         originalError: error,
         suggestions: [
           'Search for the topic in Apple Developer Documentation',
           'Check if this is an outdated link',
           `Visit the original URL directly: ${url}`,
         ],
-      };
+      });
     }
 
-    return {
-      type: ErrorType.UNKNOWN,
-      message: SAFE_ERROR_MESSAGES[ErrorType.UNKNOWN],
+    return appError(ErrorType.UNKNOWN, SAFE_ERROR_MESSAGES[ErrorType.UNKNOWN], {
       originalError: error,
-    };
+    });
   }
 
-  return {
-    type: ErrorType.UNKNOWN,
-    message: SAFE_ERROR_MESSAGES[ErrorType.UNKNOWN],
-    originalError: error instanceof Error ? error : new Error(String(error)),
-  };
+  return appError(ErrorType.UNKNOWN, SAFE_ERROR_MESSAGES[ErrorType.UNKNOWN], {
+    originalError: error,
+  });
 }
 
 /**
  * Handle JSON parsing errors
  */
 export function handleParseError(error: unknown): AppError {
-  return {
-    type: ErrorType.PARSE_ERROR,
-    message: ERROR_MESSAGES.PARSE_FAILED,
-    originalError: error instanceof Error ? error : undefined,
+  return appError(ErrorType.PARSE_ERROR, ERROR_MESSAGES.PARSE_FAILED, {
+    originalError: error,
     suggestions: [
       'The API response format may have changed',
       'Try again later',
       'Report this issue if it persists',
     ],
-  };
+  });
 }
 
 /**
@@ -130,14 +136,16 @@ export function handleParseError(error: unknown): AppError {
  */
 export function validateInput(value: string, fieldName: string, minLength: number = 1): AppError | null {
   if (!value || value.trim().length < minLength) {
-    return {
-      type: ErrorType.INVALID_INPUT,
-      message: `${fieldName} is required and must be at least ${minLength} character(s)`,
-      suggestions: [
-        `Provide a valid ${fieldName.toLowerCase()}`,
-        'Check the parameter format',
-      ],
-    };
+    return appError(
+      ErrorType.INVALID_INPUT,
+      `${fieldName} is required and must be at least ${minLength} character(s)`,
+      {
+        suggestions: [
+          `Provide a valid ${fieldName.toLowerCase()}`,
+          'Check the parameter format',
+        ],
+      },
+    );
   }
   return null;
 }
@@ -160,68 +168,62 @@ export function handleGenericError(error: unknown, context: string, fallbackMess
   if (error instanceof Error) {
     // Check for specific error types
     if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
-      return {
-        type: ErrorType.TIMEOUT,
-        message: ERROR_MESSAGES.TIMEOUT,
+      return appError(ErrorType.TIMEOUT, ERROR_MESSAGES.TIMEOUT, {
         originalError: error,
         suggestions: [
           'Try again with a simpler query',
           'Check your network connection',
           'Verify the service is available',
         ],
-      };
+      });
     }
 
     if (error.message.includes('429') || error.message.includes('rate limit')) {
-      return {
-        type: ErrorType.RATE_LIMITED,
-        message: 'Request rate limit exceeded',
+      return appError(ErrorType.RATE_LIMITED, 'Request rate limit exceeded', {
         originalError: error,
         suggestions: [
           'Wait a moment before trying again',
           'Consider reducing the frequency of requests',
         ],
-      };
+      });
     }
 
     if (error.message.includes('500') || error.message.includes('502') || error.message.includes('503')) {
-      return {
-        type: ErrorType.SERVICE_UNAVAILABLE,
-        message: 'Apple Developer Documentation service is temporarily unavailable',
-        originalError: error,
-        suggestions: [
-          'Try again in a few minutes',
-          'Check Apple Developer status page',
-          'Verify your internet connection',
-        ],
-      };
+      return appError(
+        ErrorType.SERVICE_UNAVAILABLE,
+        'Apple Developer Documentation service is temporarily unavailable',
+        {
+          originalError: error,
+          suggestions: [
+            'Try again in a few minutes',
+            'Check Apple Developer status page',
+            'Verify your internet connection',
+          ],
+        },
+      );
     }
 
     if (error.message.includes('JSON') || error.message.includes('parse')) {
       return handleParseError(error);
     }
 
-    return {
-      type: ErrorType.API_ERROR,
-      message: SAFE_ERROR_MESSAGES[ErrorType.API_ERROR],
+    return appError(ErrorType.API_ERROR, SAFE_ERROR_MESSAGES[ErrorType.API_ERROR], {
       originalError: error,
       suggestions: [
         'Check the request parameters',
         'Try again later',
         'Verify the API endpoint is correct',
       ],
-    };
+    });
   }
 
-  return {
-    type: ErrorType.UNKNOWN,
-    message: fallbackMessage || `An error occurred in ${context}`,
+  return appError(ErrorType.UNKNOWN, fallbackMessage || `An error occurred in ${context}`, {
     suggestions: [
       'Try again later',
       'Check your input parameters',
       'Contact support if the issue persists',
     ],
-  };
+  });
 }
 
 /**
@@ -268,15 +270,13 @@ export function validateInputs(
  * Handle cache-related errors
  */
 export function handleCacheError(error: unknown, operation: string): AppError {
-  return {
-    type: ErrorType.CACHE_ERROR,
-    message: `Cache operation failed: ${operation}`,
-    originalError: error instanceof Error ? error : undefined,
+  return appError(ErrorType.CACHE_ERROR, `Cache operation failed: ${operation}`, {
+    originalError: error,
     suggestions: [
       'The operation will continue without cache',
       'Try clearing the cache if issues persist',
     ],
-  };
+  });
 }
 
 /**

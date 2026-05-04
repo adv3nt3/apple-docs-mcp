@@ -18,7 +18,7 @@ import { handleGetTechnologyOverviews } from './tools/get-technology-overviews.j
 import { handleGetSampleCode } from './tools/get-sample-code.js';
 import { APPLE_URLS } from './utils/constants.js';
 import { isValidAppleDeveloperUrl } from './utils/url-converter.js';
-import { validateInput, ErrorType, createStandardErrorResponse, createToolErrorResponse } from './utils/error-handler.js';
+import { validateInput, ErrorType, createStandardErrorResponse, createToolErrorResponse, appError } from './utils/error-handler.js';
 import { httpClient } from './utils/http-client.js';
 import { preloadPopularFrameworks } from './utils/preloader.js';
 import { warmUpCaches, schedulePeriodicCacheRefresh } from './utils/cache-warmer.js';
@@ -88,17 +88,17 @@ export default class AppleDeveloperDocsMCPServer {
       try {
         return await handleToolCall(name, args, this);
       } catch (error) {
-        const appError = error instanceof Error
-          ? { type: 'UNKNOWN' as const, message: error.message, originalError: error }
-          : { type: 'UNKNOWN' as const, message: 'An unknown error occurred' };
+        const fallbackError = error instanceof Error
+          ? appError(ErrorType.UNKNOWN, error.message, { originalError: error })
+          : appError(ErrorType.UNKNOWN, 'An unknown error occurred');
 
-        logger.error(`Tool ${name} failed:`, appError);
+        logger.error(`Tool ${name} failed:`, fallbackError);
 
         return {
           content: [
             {
               type: 'text',
-              text: `Error: ${appError.message}`,
+              text: `Error: ${fallbackError.message}`,
             },
           ],
           isError: true,
@@ -149,10 +149,10 @@ export default class AppleDeveloperDocsMCPServer {
 
       // 验证是否为有效的Apple Developer URL
       if (!isValidAppleDeveloperUrl(url)) {
-        return createToolErrorResponse({
-          type: ErrorType.INVALID_INPUT,
-          message: 'URL must be from developer.apple.com',
-        }, 'get_apple_doc_content');
+        return createToolErrorResponse(
+          appError(ErrorType.INVALID_INPUT, 'URL must be from developer.apple.com'),
+          'get_apple_doc_content',
+        );
       }
 
       // fetchAppleDocJson 已经返回正确的MCP响应格式，直接返回
