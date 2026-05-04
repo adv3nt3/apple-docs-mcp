@@ -43,25 +43,31 @@ async function readBundledFile(filePath: string): Promise<string> {
 }
 
 /**
- * Fetch data with caching support
+ * Fetch and parse a JSON file with caching support.
+ *
+ * The cache is keyed by the resolved absolute path so that equivalent
+ * input paths share the same entry, and only parsed-and-validated JSON
+ * is ever stored — never raw bytes. This prevents a failed/malicious
+ * read from poisoning subsequent callers.
  */
-async function fetchData(filePath: string): Promise<string> {
-  const cacheKey = `wwdc:${filePath}`;
+async function fetchJson<T>(filePath: string): Promise<T> {
+  const fullPath = path.resolve(path.join(WWDC_DATA_DIR, filePath));
+  const cacheKey = `wwdc:${fullPath}`;
 
-  // Check cache first
-  const cached = wwdcDataCache.get<string>(cacheKey);
-  if (cached) {
+  // Check cache first — only parsed values are stored here.
+  const cached = wwdcDataCache.get<unknown>(cacheKey);
+  if (cached !== undefined) {
     logger.debug(`Cache hit: ${filePath}`);
-    return cached;
+    return cached as T;
   }
 
-  // Read from bundled data
+  // Read from bundled data and parse before caching.
   const data = await readBundledFile(filePath);
+  const parsed = JSON.parse(data) as T;
 
-  // Cache the data
-  wwdcDataCache.set(cacheKey, data, WWDC_CONFIG.CACHE_TTL);
+  wwdcDataCache.set(cacheKey, parsed, WWDC_CONFIG.CACHE_TTL);
 
-  return data;
+  return parsed;
 }
 
 /**
@@ -69,8 +75,7 @@ async function fetchData(filePath: string): Promise<string> {
  */
 export async function loadGlobalMetadata(): Promise<GlobalMetadata> {
   try {
-    const data = await fetchData('index.json');
-    return JSON.parse(data);
+    return await fetchJson<GlobalMetadata>('index.json');
   } catch (error) {
     logger.error('Failed to load global metadata', error);
     throw new Error('Failed to load WWDC metadata. Please ensure the package is properly installed.');
@@ -82,8 +87,7 @@ export async function loadGlobalMetadata(): Promise<GlobalMetadata> {
  */
 export async function loadTopicIndex(topicId: string): Promise<TopicIndex> {
   try {
-    const data = await fetchData(`by-topic/${topicId}/index.json`);
-    return JSON.parse(data);
+    return await fetchJson<TopicIndex>(`by-topic/${topicId}/index.json`);
   } catch (error) {
     logger.error(`Failed to load topic index: ${topicId}`, error);
     throw new Error(`Topic not found: ${topicId}`);
@@ -95,8 +99,7 @@ export async function loadTopicIndex(topicId: string): Promise<TopicIndex> {
  */
 export async function loadYearIndex(year: string): Promise<YearIndex> {
   try {
-    const data = await fetchData(`by-year/${year}/index.json`);
-    return JSON.parse(data);
+    return await fetchJson<YearIndex>(`by-year/${year}/index.json`);
   } catch (error) {
     logger.error(`Failed to load year index: ${year}`, error);
     throw new Error(`Year not found: ${year}`);
@@ -108,8 +111,7 @@ export async function loadYearIndex(year: string): Promise<YearIndex> {
  */
 export async function loadVideoData(year: string, videoId: string): Promise<WWDCVideo> {
   try {
-    const data = await fetchData(`videos/${year}-${videoId}.json`);
-    return JSON.parse(data);
+    return await fetchJson<WWDCVideo>(`videos/${year}-${videoId}.json`);
   } catch (error) {
     logger.error(`Failed to load video: ${year}-${videoId}`, error);
     throw new Error(`Video not found: ${year}-${videoId}`);
@@ -121,8 +123,7 @@ export async function loadVideoData(year: string, videoId: string): Promise<WWDC
  */
 export async function loadAllVideos(): Promise<WWDCVideo[]> {
   try {
-    const data = await fetchData('all-videos.json');
-    return JSON.parse(data);
+    return await fetchJson<WWDCVideo[]>('all-videos.json');
   } catch (error) {
     logger.error('Failed to load all videos', error);
     throw new Error('Failed to load WWDC video list');
