@@ -1,6 +1,6 @@
 {
-  "name": "@kimsungwhee/apple-docs-mcp",
-  "version": "1.0.26",
+  "name": "@adv3nt3/apple-docs-mcp",
+  "version": "1.1.0",
   "description": "MCP server for Apple Developer Documentation - Search iOS/macOS/SwiftUI/UIKit docs, WWDC videos, Swift/Objective-C APIs & code examples in Claude, Cursor & AI assistants",
   "type": "module",
   "main": "dist/index.js",
@@ -15,12 +15,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/kimsungwhee/apple-docs-mcp.git"
+    "url": "https://github.com/adv3nt3/apple-docs-mcp.git"
   },
   "bugs": {
-    "url": "https://github.com/kimsungwhee/apple-docs-mcp/issues"
+    "url": "https://github.com/adv3nt3/apple-docs-mcp/issues"
   },
-  "homepage": "https://github.com/kimsungwhee/apple-docs-mcp#readme",
+  "homepage": "https://github.com/adv3nt3/apple-docs-mcp#readme",
   "publishConfig": {
     "access": "public"
   },
@@ -53,28 +53,28 @@
     "sample-code",
     "apple-apis"
   ],
-  "author": "kimsungwhee",
+  "author": "adv3nt3",
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "cheerio": "^1.1.0",
-    "zod": "^4.0.5"
+    "cheerio": "^1.2.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.3",
-    "@jest/globals": "^30.0.4",
-    "@stylistic/eslint-plugin": "^5.5.0",
+    "@eslint/js": "^10.0.1",
+    "@jest/globals": "^30.3.0",
+    "@stylistic/eslint-plugin": "^5.10.0",
     "@types/jest": "^30.0.0",
     "@types/jsdom": "^21.1.7",
-    "@types/node": "^20.11.0",
+    "@types/node": "^25.6.0",
     "@typescript-eslint/eslint-plugin": "^8.59.2",
     "@typescript-eslint/parser": "^8.59.2",
-    "eslint": "^9.39.3",
-    "jest": "^30.0.4",
+    "eslint": "^10.3.0",
+    "jest": "^30.3.0",
     "jsdom": "^26.1.0",
-    "ts-jest": "^29.4.0",
-    "tsx": "^4.20.3",
-    "typescript": "^5.3.3",
+    "ts-jest": "^29.4.9",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.2"
   }
 }

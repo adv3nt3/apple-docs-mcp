@@ -1,6 +1,6 @@
 # Apple Docs MCP - Apple 開発者ドキュメント モデルコンテキストプロトコルサーバー
 
-[![npm バージョン](https://badge.fury.io/js/@kimsungwhee%2Fapple-docs-mcp.svg)](https://badge.fury.io/js/@kimsungwhee%2Fapple-docs-mcp)
+[![npm バージョン](https://badge.fury.io/js/@adv3nt3%2Fapple-docs-mcp.svg)](https://badge.fury.io/js/@adv3nt3%2Fapple-docs-mcp)
 [![ライセンス: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Apple 開発者ドキュメント MCP サーバー - モデルコンテキストプロトコルで Apple 公式開発者ドキュメント、フレームワーク、API、SwiftUI、UIKit、WWDC ビデオにアクセス。AI 自然言語クエリで iOS、macOS、watchOS、tvOS、visionOS ドキュメントを検索。Claude、Cursor、または MCP 対応 AI アシスタントで Swift/Objective-C コード例、API リファレンス、技術ガイドを即座に取得。
@@ -37,7 +37,7 @@ Claude Desktop 設定ファイルに以下を追加してください：
   "mcpServers": {
     "apple-docs": {
       "command": "npx",
-      "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
     }
   }
 }
@@ -45,7 +45,7 @@ Claude Desktop 設定ファイルに以下を追加してください：
 
 > **注意**: 古いバージョンが使用される問題が発生した場合、`@latest` を追加して最新バージョンを強制します：
 > ```json
-> "args": ["-y", "@kimsungwhee/apple-docs-mcp@latest"]
+> "args": ["-y", "@adv3nt3/apple-docs-mcp@latest"]
 > ```
 
 Claude Desktop を再起動して Apple API について質問を始めましょう！
@@ -56,7 +56,7 @@ Claude Desktop を再起動して Apple API について質問を始めましょ
 <summary><strong>📱 Claude Code</strong></summary>
 
 ```bash
-claude mcp add apple-docs -- npx -y @kimsungwhee/apple-docs-mcp@latest
+claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
 ```
 
 [📖 Claude Code MCP ドキュメント](https://docs.anthropic.com/en/docs/claude-code/mcp)
@@ -75,7 +75,7 @@ claude mcp add apple-docs -- npx -y @kimsungwhee/apple-docs-mcp@latest
   "mcpServers": {
     "apple-docs": {
       "command": "npx",
-      "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
     }
   }
 }
@@ -97,7 +97,7 @@ VS Code MCP 設定に追加:
       "apple-docs": {
         "type": "stdio",
         "command": "npx",
-        "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+        "args": ["-y", "@adv3nt3/apple-docs-mcp"]
       }
     }
   }
@@ -118,7 +118,7 @@ Windsurf MCP 設定に追加:
   "mcpServers": {
     "apple-docs": {
       "command": "npx",
-      "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
     }
   }
 }
@@ -139,7 +139,7 @@ Zed の `settings.json` に追加:
     "Apple Docs": {
       "command": {
         "path": "npx",
-        "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+        "args": ["-y", "@adv3nt3/apple-docs-mcp"]
       },
       "settings": {}
     }
@@ -165,7 +165,7 @@ Zed の `settings.json` に追加:
   "mcpServers": {
     "apple-docs": {
       "command": "npx",
-      "args": ["-y", "@kimsungwhee/apple-docs-mcp"],
+      "args": ["-y", "@adv3nt3/apple-docs-mcp"],
       "disabled": false,
       "autoApprove": []
     }
@@ -185,7 +185,7 @@ Windows システムの場合:
   "mcpServers": {
     "apple-docs": {
       "command": "cmd",
-      "args": ["/c", "npx", "-y", "@kimsungwhee/apple-docs-mcp"],
+      "args": ["/c", "npx", "-y", "@adv3nt3/apple-docs-mcp"],
       "disabled": false,
       "autoApprove": []
     }
@@ -201,20 +201,20 @@ Windows システムの場合:
 **グローバルインストール**:
 ```bash
 # pnpm を使用（推奨）
-pnpm add -g @kimsungwhee/apple-docs-mcp
+pnpm add -g @adv3nt3/apple-docs-mcp
 
 # npm を使用
-npm install -g @kimsungwhee/apple-docs-mcp
+npm install -g @adv3nt3/apple-docs-mcp
 ```
 
 **直接使用**:
 ```bash
-npx @kimsungwhee/apple-docs-mcp --help
+npx @adv3nt3/apple-docs-mcp --help
 ```
 
 **開発環境セットアップ**:
 ```bash
-git clone https://github.com/kimsungwhee/apple-docs-mcp.git
+git clone https://github.com/adv3nt3/apple-docs-mcp.git
 cd apple-docs-mcp
 
 # pnpm を使用（推奨）
@@ -422,7 +422,7 @@ pnpm run clean  # または: npm run clean
 node dist/index.js
 
 # サンプルクエリでテスト
-npx @kimsungwhee/apple-docs-mcp --test
+npx @adv3nt3/apple-docs-mcp --test
 ```
 
 ## 🤝 コントリビューション
@@ -451,6 +451,6 @@ MIT ライセンス - 詳細は [LICENSE](LICENSE) をご覧ください。
 
 Apple 開発者ドキュメント検索 | iOS 開発 | macOS 開発 | Swift プログラミング | SwiftUI | UIKit | Xcode | WWDC ビデオ | モデルコンテキストプロトコル | MCP サーバー
 
-[問題を報告](https://github.com/kimsungwhee/apple-docs-mcp/issues) • [機能リクエスト](https://github.com/kimsungwhee/apple-docs-mcp/issues/new) • [ドキュメント](https://github.com/kimsungwhee/apple-docs-mcp)
+[問題を報告](https://github.com/adv3nt3/apple-docs-mcp/issues) • [機能リクエスト](https://github.com/adv3nt3/apple-docs-mcp/issues/new) • [ドキュメント](https://github.com/adv3nt3/apple-docs-mcp)
 
 </div>

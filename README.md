@@ -1,6 +1,6 @@
 # Apple Docs MCP - Apple Developer Documentation Model Context Protocol Server
 
-[![npm version](https://badge.fury.io/js/@kimsungwhee%2Fapple-docs-mcp.svg)](https://badge.fury.io/js/@kimsungwhee%2Fapple-docs-mcp)
+[![npm version](https://badge.fury.io/js/@adv3nt3%2Fapple-docs-mcp.svg)](https://badge.fury.io/js/@adv3nt3%2Fapple-docs-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Apple Developer Documentation MCP Server - Access Apple's official developer docs, frameworks, APIs, SwiftUI, UIKit, and WWDC videos through Model Context Protocol. Search iOS, macOS, watchOS, tvOS, and visionOS documentation with AI-powered natural language queries. Get instant access to Swift/Objective-C code examples, API references, and technical guides directly in Claude, Cursor, or any MCP-compatible AI assistant.
@@ -38,7 +38,7 @@ Add this to your Claude Desktop configuration:
   "mcpServers": {
     "apple-docs": {
       "command": "npx",
-      "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
     }
   }
 }
@@ -46,7 +46,7 @@ Add this to your Claude Desktop configuration:
 
 > **Note**: If you encounter issues with an old version being used, add `@latest` to force the latest version:
 > ```json
-> "args": ["-y", "@kimsungwhee/apple-docs-mcp@latest"]
+> "args": ["-y", "@adv3nt3/apple-docs-mcp@latest"]
 > ```
 
 Restart Claude Desktop and start asking about Apple APIs!
@@ -57,7 +57,7 @@ Restart Claude Desktop and start asking about Apple APIs!
 <summary><strong>📱 Claude Code</strong></summary>
 
 ```bash
-claude mcp add apple-docs -- npx -y @kimsungwhee/apple-docs-mcp@latest
+claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
 ```
 
 [📖 Claude Code MCP docs](https://docs.anthropic.com/en/docs/claude-code/mcp)
@@ -76,7 +76,7 @@ claude mcp add apple-docs -- npx -y @kimsungwhee/apple-docs-mcp@latest
   "mcpServers": {
     "apple-docs": {
       "command": "npx",
-      "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
     }
   }
 }
@@ -98,7 +98,7 @@ Add to your VS Code MCP config:
       "apple-docs": {
         "type": "stdio",
         "command": "npx",
-        "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+        "args": ["-y", "@adv3nt3/apple-docs-mcp"]
       }
     }
   }
@@ -119,7 +119,7 @@ Add to your Windsurf MCP config:
   "mcpServers": {
     "apple-docs": {
       "command": "npx",
-      "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
     }
   }
 }
@@ -140,7 +140,7 @@ Add to your Zed `settings.json`:
     "Apple Docs": {
       "command": {
         "path": "npx",
-        "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+        "args": ["-y", "@adv3nt3/apple-docs-mcp"]
       },
       "settings": {}
     }
@@ -166,7 +166,7 @@ Add to your Zed `settings.json`:
   "mcpServers": {
     "apple-docs": {
       "command": "npx",
-      "args": ["-y", "@kimsungwhee/apple-docs-mcp"],
+      "args": ["-y", "@adv3nt3/apple-docs-mcp"],
       "disabled": false,
       "autoApprove": []
     }
@@ -186,7 +186,7 @@ Add to your Zed `settings.json`:
   "mcpServers": {
     "apple-docs": {
       "command": "npx",
-      "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
     }
   }
 }
@@ -206,7 +206,7 @@ For Windows systems, use:
   "mcpServers": {
     "apple-docs": {
       "command": "cmd",
-      "args": ["/c", "npx", "-y", "@kimsungwhee/apple-docs-mcp"],
+      "args": ["/c", "npx", "-y", "@adv3nt3/apple-docs-mcp"],
       "disabled": false,
       "autoApprove": []
     }
@@ -222,20 +222,20 @@ For Windows systems, use:
 **Global Installation**:
 ```bash
 # Using pnpm (recommended)
-pnpm add -g @kimsungwhee/apple-docs-mcp
+pnpm add -g @adv3nt3/apple-docs-mcp
 
 # Using npm
-npm install -g @kimsungwhee/apple-docs-mcp
+npm install -g @adv3nt3/apple-docs-mcp
 ```
 
 **Direct Usage**:
 ```bash
-npx @kimsungwhee/apple-docs-mcp --help
+npx @adv3nt3/apple-docs-mcp --help
 ```
 
 **Development Setup**:
 ```bash
-git clone https://github.com/kimsungwhee/apple-docs-mcp.git
+git clone https://github.com/adv3nt3/apple-docs-mcp.git
 cd apple-docs-mcp
 
 # Using pnpm (recommended)
@@ -497,7 +497,7 @@ pnpm run clean  # or: npm run clean
 node dist/index.js
 
 # Test with sample queries
-npx @kimsungwhee/apple-docs-mcp --test
+npx @adv3nt3/apple-docs-mcp --test
 ```
 
 ## 🤝 Contributing
@@ -526,6 +526,6 @@ This project is not affiliated with or endorsed by Apple Inc. It uses publicly a
 
 Search Apple Developer Documentation | iOS Development | macOS Development | Swift Programming | SwiftUI | UIKit | Xcode | WWDC Videos | Model Context Protocol | MCP Server
 
-[Report Issues](https://github.com/kimsungwhee/apple-docs-mcp/issues) • [Request Features](https://github.com/kimsungwhee/apple-docs-mcp/issues/new) • [Documentation](https://github.com/kimsungwhee/apple-docs-mcp)
+[Report Issues](https://github.com/adv3nt3/apple-docs-mcp/issues) • [Request Features](https://github.com/adv3nt3/apple-docs-mcp/issues/new) • [Documentation](https://github.com/adv3nt3/apple-docs-mcp)
 
 </div>
