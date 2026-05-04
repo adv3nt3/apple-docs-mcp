@@ -22,8 +22,17 @@ const WWDC_DATA_DIR = getWWDCDataDirectory();
 async function readBundledFile(filePath: string): Promise<string> {
   const fullPath = path.join(WWDC_DATA_DIR, filePath);
 
+  // Defense-in-depth: ensure the resolved path stays within WWDC_DATA_DIR.
+  // path.join collapses '..' segments, so a caller-supplied filePath like
+  // '../../etc/passwd' would otherwise escape the data root.
+  const resolved = path.resolve(fullPath);
+  const root = path.resolve(WWDC_DATA_DIR);
+  if (resolved !== root && !resolved.startsWith(root + path.sep)) {
+    throw new Error(`Invalid WWDC data path: ${filePath}`);
+  }
+
   try {
-    const content = await fs.readFile(fullPath, 'utf-8');
+    const content = await fs.readFile(resolved, 'utf-8');
     logger.debug(`Loaded bundled data: ${filePath}`);
     return content;
   } catch (error) {
