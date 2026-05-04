@@ -456,48 +456,21 @@ The package includes:
 
 ## ⚙️ Configuration
 
-### 🔄 UserAgent Pool Configuration
+### 🔄 UserAgent Pool
 
-The MCP server includes an intelligent UserAgent rotation system to improve API reliability:
+The server ships with a built-in pool of Safari User-Agent strings (see `src/utils/constants.ts`) and rotates them automatically on each request. The pool itself is not user-configurable at runtime.
 
-#### Environment Variables
+#### HTTP Header Environment Variables
 
-| Variable | Description | Default | Example |
-|----------|-------------|---------|---------|
-| `USER_AGENT_ROTATION_ENABLED` | Enable/disable rotation | `true` | `true` |
-| `USER_AGENT_POOL_STRATEGY` | Rotation strategy | `random` | `smart` |
-| `USER_AGENT_MAX_RETRIES` | Max retry attempts | `3` | `5` |
-| `USER_AGENT_POOL_CONFIG` | Custom pool config (JSON) | Built-in agents | See below |
+The following environment variables (consumed in `src/utils/http-client.ts`) tune the headers attached to outbound requests:
 
-#### Custom Pool Configuration
-
-```bash
-# Configure custom UserAgent pool
-export USER_AGENT_POOL_CONFIG='[
-  {"userAgent": "MyApp/1.0 (compatible)", "weight": 3, "maxUsageCount": 1000},
-  {"userAgent": "MyApp/2.0 (advanced)", "weight": 2, "maxUsageCount": 800}
-]'
-
-# Set rotation strategy (random/sequential/smart)
-export USER_AGENT_POOL_STRATEGY=smart
-
-# Enable debugging
-export NODE_ENV=development
-```
-
-#### Available Strategies
-
-- **`random`**: Fast random selection (best performance)
-- **`sequential`**: Round-robin rotation (predictable order)
-- **`smart`**: Success rate optimization (best reliability)
-
-#### Built-in UserAgents
-
-The server includes 12+ pre-configured UserAgent strings covering:
-- Chrome (Mac Intel/Apple Silicon, Windows, Linux)
-- Firefox (Mac Intel/Apple Silicon, Windows, Linux)
-- Safari (Mac Intel/Apple Silicon, latest versions)
-- Edge (Windows, Mac Intel/Apple Silicon)
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DISABLE_SEC_FETCH` | Set to `true` to omit `Sec-Fetch-*` headers | `false` |
+| `DISABLE_DNT` | Set to `true` to omit the `DNT` header | `false` |
+| `DISABLE_LANGUAGE_ROTATION` | Set to `true` to disable `Accept-Language` rotation | `false` |
+| `SIMPLE_HEADERS_MODE` | Set to `true` to send a minimal header set | `false` |
+| `DEFAULT_ACCEPT_LANGUAGE` | Override the default `Accept-Language` value | `en-US,en;q=0.9` |
 
 ## 🧪 Development
 
