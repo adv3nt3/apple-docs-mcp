@@ -5,6 +5,7 @@
  * JSON files that are bundled with the npm package.
  */
 
+import { createHash } from 'crypto';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { logger } from './logger.js';
@@ -15,6 +16,59 @@ import type { WWDCVideo, GlobalMetadata, TopicIndex, YearIndex } from '../types/
 
 // Get the data directory from the separate module
 const WWDC_DATA_DIR = getWWDCDataDirectory();
+
+/**
+ * Expected SHA-256 of the bundled `data/wwdc/index.json` file.
+ *
+ * This acts as a soft supply-chain integrity check: if a published npm
+ * tarball or local install has tampered/swapped WWDC metadata, the
+ * mismatch is logged via `logger.warn` so operators can investigate.
+ *
+ * NOTE: regenerate this constant after every WWDC data refresh, e.g.
+ *   shasum -a 256 data/wwdc/index.json
+ * or:
+ *   node -e "const c=require('crypto');const fs=require('fs');\
+ *console.log(c.createHash('sha256').update(\
+ *fs.readFileSync('data/wwdc/index.json')).digest('hex'))"
+ */
+const EXPECTED_INDEX_SHA256 =
+  '36f98581d9b0462d539d6761b841f6c3728a8382e56a1a3a07dd0164e4aa061c';
+
+// Run the integrity check at most once per process.
+let integrityCheckPromise: Promise<void> | null = null;
+
+/**
+ * Soft SHA-256 integrity check for `index.json`. Logs a warning on
+ * mismatch but never throws — offline users who patch their bundled
+ * data should not have their installs bricked.
+ */
+async function verifyIndexIntegrity(): Promise<void> {
+  if (integrityCheckPromise) {
+    return integrityCheckPromise;
+  }
+
+  integrityCheckPromise = (async () => {
+    try {
+      const indexPath = path.join(WWDC_DATA_DIR, 'index.json');
+      const buf = await fs.readFile(indexPath);
+      const actual = createHash('sha256').update(buf).digest('hex');
+      if (actual !== EXPECTED_INDEX_SHA256) {
+        logger.warn(
+          `WWDC index.json SHA-256 mismatch (expected ${EXPECTED_INDEX_SHA256}, got ${actual}). ` +
+            'Bundled data may have been modified locally or tampered with in transit. ' +
+            'If you intentionally edited the data, regenerate EXPECTED_INDEX_SHA256 in src/utils/wwdc-data-source.ts.',
+        );
+      }
+    } catch (error) {
+      // Non-fatal: integrity check should never block data loading.
+      logger.warn(
+        `WWDC index.json integrity check skipped: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  })();
+
+  return integrityCheckPromise;
+}
 
 /**
  * Read file from bundled data directory
@@ -60,6 +114,9 @@ async function fetchData(filePath: string): Promise<string> {
  */
 export async function loadGlobalMetadata(): Promise<GlobalMetadata> {
   try {
+    // Fire-and-forget soft integrity check on the first call. Awaited
+    // via void so a slow disk read never blocks metadata loading.
+    void verifyIndexIntegrity();
     const data = await fetchData('index.json');
     return JSON.parse(data);
   } catch (error) {
