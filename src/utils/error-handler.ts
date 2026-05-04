@@ -12,6 +12,26 @@ export type { AppError };
 export { ErrorType };
 
 /**
+ * Generic, user-safe messages keyed by ErrorType. Raw exception text may
+ * include byte snippets of the parsed input or other internal details, so
+ * user-visible AppError.message values are mapped to these strings while the
+ * original error is preserved on AppError.originalError for logging only.
+ */
+const SAFE_ERROR_MESSAGES: Record<ErrorType, string> = {
+  [ErrorType.INVALID_INPUT]: 'Invalid input parameters',
+  [ErrorType.PARSE_ERROR]: 'Failed to parse response',
+  [ErrorType.NETWORK_ERROR]: 'Network error contacting upstream',
+  [ErrorType.TIMEOUT]: 'Request timed out',
+  [ErrorType.NOT_FOUND]: 'Resource not found',
+  [ErrorType.RATE_LIMITED]: 'Rate limit exceeded',
+  [ErrorType.SERVICE_UNAVAILABLE]: 'Service temporarily unavailable',
+  [ErrorType.API_ERROR]: 'Upstream API error',
+  [ErrorType.CACHE_ERROR]: 'Cache operation failed',
+  [ErrorType.VALIDATION_ERROR]: 'Validation failed',
+  [ErrorType.UNKNOWN]: 'An error occurred',
+};
+
+/**
  * Create a standardized error response
  */
 export function createErrorResponse(error: AppError): ErrorResponse {
@@ -77,14 +97,15 @@ export function handleFetchError(error: unknown, url: string): AppError {
 
     return {
       type: ErrorType.UNKNOWN,
-      message: error.message,
+      message: SAFE_ERROR_MESSAGES[ErrorType.UNKNOWN],
       originalError: error,
     };
   }
 
   return {
     type: ErrorType.UNKNOWN,
-    message: String(error),
+    message: SAFE_ERROR_MESSAGES[ErrorType.UNKNOWN],
+    originalError: error instanceof Error ? error : new Error(String(error)),
   };
 }
 
@@ -182,7 +203,7 @@ export function handleGenericError(error: unknown, context: string, fallbackMess
 
     return {
       type: ErrorType.API_ERROR,
-      message: error.message,
+      message: SAFE_ERROR_MESSAGES[ErrorType.API_ERROR],
       originalError: error,
       suggestions: [
         'Check the request parameters',
