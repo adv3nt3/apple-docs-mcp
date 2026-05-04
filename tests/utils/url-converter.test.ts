@@ -2,7 +2,13 @@
  * Tests for URL converter utilities
  */
 
-import { convertToJsonApiUrl, isValidAppleDeveloperUrl, extractApiNameFromUrl } from '../../src/utils/url-converter.js';
+import {
+  convertToJsonApiUrl,
+  isValidAppleDeveloperUrl,
+  extractApiNameFromUrl,
+  assertAppleDeveloperUrl,
+} from '../../src/utils/url-converter.js';
+import { ErrorType } from '../../src/utils/error-handler.js';
 
 describe('URL Converter', () => {
   describe('convertToJsonApiUrl', () => {
@@ -90,6 +96,61 @@ describe('URL Converter', () => {
 
     it('should return "Unknown API" for invalid URLs', () => {
       expect(extractApiNameFromUrl('not-a-url')).toBe('Unknown API');
+    });
+  });
+
+  describe('assertAppleDeveloperUrl (H2 SSRF guard)', () => {
+    it.each([
+      'https://developer.apple.com',
+      'https://developer.apple.com/',
+      'https://developer.apple.com/documentation/swiftui',
+      'https://developer.apple.com/documentation/swiftui/view',
+      'https://developer.apple.com/tutorials/swiftui',
+      'https://developer.apple.com/news/some-article',
+      'https://developer.apple.com/path?query=foo',
+    ])('allows %s', (url) => {
+      expect(() => assertAppleDeveloperUrl(url)).not.toThrow();
+    });
+
+    it.each([
+      'https://attacker.example/',
+      'https://apple.com/documentation/swiftui',
+      'https://developer.apple.com.attacker.example/',
+      'http://attacker.example/?developer.apple.com=foo',
+      'https://attacker.example/?developer.apple.com=foo',
+      'not-a-url',
+      '',
+      'file:///etc/passwd',
+      // Substring-attack regression: just having developer.apple.com in
+      // the URL anywhere must not be enough.
+      'https://attacker.example/developer.apple.com/path',
+    ])('throws an INVALID_INPUT AppError for %j', (url) => {
+      let caught: unknown;
+      try {
+        assertAppleDeveloperUrl(url);
+      } catch (err) {
+        caught = err;
+      }
+      expect(caught).toBeDefined();
+      // The thrown value is an AppError-shape object, not a vanilla Error.
+      expect(typeof caught).toBe('object');
+      expect(caught).toMatchObject({
+        type: ErrorType.INVALID_INPUT,
+        message: 'URL must be from developer.apple.com',
+      });
+    });
+
+    it('passes the duck-type check used by handleAsyncOperation', () => {
+      let caught: unknown;
+      try {
+        assertAppleDeveloperUrl('https://attacker.example/');
+      } catch (err) {
+        caught = err;
+      }
+      expect(caught).toBeTruthy();
+      // The 'type' in error guard from src/index.ts:handleAsyncOperation
+      // must succeed against this thrown value.
+      expect(typeof caught === 'object' && caught !== null && 'type' in caught).toBe(true);
     });
   });
 });
