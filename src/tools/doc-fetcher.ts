@@ -3,6 +3,7 @@ import { convertToJsonApiUrl, isValidAppleDeveloperUrl } from '../utils/url-conv
 import { httpClient } from '../utils/http-client.js';
 import type { AppleDocJSON } from '../types/apple-docs.js';
 import type { ContentSection, ContentItem } from '../types/content-sections.js';
+import type { AppError } from '../types/error.js';
 import { logger } from '../utils/logger.js';
 import { PROCESSING_LIMITS, RECURSION_LIMITS } from '../utils/constants.js';
 import {
@@ -389,24 +390,22 @@ export async function fetchAppleDocJson(
 
     return result;
   } catch (error) {
-    let errorMessage: string;
+    // Log raw error details for debugging only — never echo them to the client.
+    logger.error('Error fetching Apple doc JSON:', error);
 
-    // Handle AppError objects from http-client
-    if (error && typeof error === 'object' && 'message' in error) {
-      errorMessage = (error as any).message;
-    } else if (error instanceof Error) {
-      errorMessage = error.message;
-    } else {
-      errorMessage = String(error);
-    }
-
-    logger.error('Error fetching Apple doc JSON:', errorMessage);
+    // Use the AppError's pre-sanitized message when available; otherwise fall
+    // back to a generic string. This avoids surfacing raw exception text
+    // (which can include byte snippets of parsed input on JSON.parse failures).
+    const safeMessage =
+      error && typeof error === 'object' && 'type' in error && 'message' in error
+        ? String((error as AppError).message)
+        : 'Failed to get Apple doc content';
 
     return {
       content: [
         {
           type: 'text' as const,
-          text: `Error: Failed to get Apple doc content: ${errorMessage}\n\nPlease try accessing the documentation directly at: ${url}`,
+          text: `Error: ${safeMessage}\n\nPlease try accessing the documentation directly at: ${url}`,
         },
       ],
       isError: true,
