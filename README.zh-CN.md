@@ -1,6 +1,6 @@
 # Apple Docs MCP - Apple 开发者文档模型上下文协议服务器
 
-[![npm 版本](https://badge.fury.io/js/@kimsungwhee%2Fapple-docs-mcp.svg)](https://badge.fury.io/js/@kimsungwhee%2Fapple-docs-mcp)
+[![npm 版本](https://badge.fury.io/js/@adv3nt3%2Fapple-docs-mcp.svg)](https://badge.fury.io/js/@adv3nt3%2Fapple-docs-mcp)
 [![许可证: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Apple 开发者文档 MCP 服务器 - 通过模型上下文协议访问 Apple 官方开发文档、框架、API、SwiftUI、UIKit 和 WWDC 视频。使用 AI 自然语言查询搜索 iOS、macOS、watchOS、tvOS 和 visionOS 文档。在 Claude、Cursor 或任何兼容 MCP 的 AI 助手中即时获取 Swift/Objective-C 代码示例、API 参考和技术指南。
@@ -37,7 +37,7 @@ Apple 开发者文档 MCP 服务器 - 通过模型上下文协议访问 Apple �
   "mcpServers": {
     "apple-docs": {
       "command": "npx",
-      "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
     }
   }
 }
@@ -45,7 +45,7 @@ Apple 开发者文档 MCP 服务器 - 通过模型上下文协议访问 Apple �
 
 > **注意**: 如果遇到使用旧版本的问题，添加 `@latest` 以强制使用最新版本：
 > ```json
-> "args": ["-y", "@kimsungwhee/apple-docs-mcp@latest"]
+> "args": ["-y", "@adv3nt3/apple-docs-mcp@latest"]
 > ```
 
 重启 Claude Desktop 并开始询问 Apple API！
@@ -56,7 +56,7 @@ Apple 开发者文档 MCP 服务器 - 通过模型上下文协议访问 Apple �
 <summary><strong>📱 Claude Code</strong></summary>
 
 ```bash
-claude mcp add apple-docs -- npx -y @kimsungwhee/apple-docs-mcp@latest
+claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
 ```
 
 [📖 Claude Code MCP 文档](https://docs.anthropic.com/en/docs/claude-code/mcp)
@@ -75,7 +75,7 @@ claude mcp add apple-docs -- npx -y @kimsungwhee/apple-docs-mcp@latest
   "mcpServers": {
     "apple-docs": {
       "command": "npx",
-      "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
     }
   }
 }
@@ -97,7 +97,7 @@ claude mcp add apple-docs -- npx -y @kimsungwhee/apple-docs-mcp@latest
       "apple-docs": {
         "type": "stdio",
         "command": "npx",
-        "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+        "args": ["-y", "@adv3nt3/apple-docs-mcp"]
       }
     }
   }
@@ -118,7 +118,7 @@ claude mcp add apple-docs -- npx -y @kimsungwhee/apple-docs-mcp@latest
   "mcpServers": {
     "apple-docs": {
       "command": "npx",
-      "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
     }
   }
 }
@@ -139,7 +139,7 @@ claude mcp add apple-docs -- npx -y @kimsungwhee/apple-docs-mcp@latest
     "Apple Docs": {
       "command": {
         "path": "npx",
-        "args": ["-y", "@kimsungwhee/apple-docs-mcp"]
+        "args": ["-y", "@adv3nt3/apple-docs-mcp"]
       },
       "settings": {}
     }
@@ -165,7 +165,7 @@ claude mcp add apple-docs -- npx -y @kimsungwhee/apple-docs-mcp@latest
   "mcpServers": {
     "apple-docs": {
       "command": "npx",
-      "args": ["-y", "@kimsungwhee/apple-docs-mcp"],
+      "args": ["-y", "@adv3nt3/apple-docs-mcp"],
       "disabled": false,
       "autoApprove": []
     }
@@ -185,7 +185,7 @@ claude mcp add apple-docs -- npx -y @kimsungwhee/apple-docs-mcp@latest
   "mcpServers": {
     "apple-docs": {
       "command": "cmd",
-      "args": ["/c", "npx", "-y", "@kimsungwhee/apple-docs-mcp"],
+      "args": ["/c", "npx", "-y", "@adv3nt3/apple-docs-mcp"],
       "disabled": false,
       "autoApprove": []
     }
@@ -201,20 +201,20 @@ claude mcp add apple-docs -- npx -y @kimsungwhee/apple-docs-mcp@latest
 **全局安装**:
 ```bash
 # 使用 pnpm（推荐）
-pnpm add -g @kimsungwhee/apple-docs-mcp
+pnpm add -g @adv3nt3/apple-docs-mcp
 
 # 使用 npm
-npm install -g @kimsungwhee/apple-docs-mcp
+npm install -g @adv3nt3/apple-docs-mcp
 ```
 
 **直接使用**:
 ```bash
-npx @kimsungwhee/apple-docs-mcp --help
+npx @adv3nt3/apple-docs-mcp --help
 ```
 
 **开发环境设置**:
 ```bash
-git clone https://github.com/kimsungwhee/apple-docs-mcp.git
+git clone https://github.com/adv3nt3/apple-docs-mcp.git
 cd apple-docs-mcp
 
 # 使用 pnpm（推荐）
@@ -433,7 +433,7 @@ pnpm run clean  # 或: npm run clean
 node dist/index.js
 
 # 使用示例查询测试
-npx @kimsungwhee/apple-docs-mcp --test
+npx @adv3nt3/apple-docs-mcp --test
 ```
 
 ## 🤝 贡献
@@ -462,6 +462,6 @@ MIT 许可证 - 详见 [LICENSE](LICENSE)。
 
 搜索 Apple 开发者文档 | iOS 开发 | macOS 开发 | Swift 编程 | SwiftUI | UIKit | Xcode | WWDC 视频 | 模型上下文协议 | MCP 服务器
 
-[报告问题](https://github.com/kimsungwhee/apple-docs-mcp/issues) • [请求功能](https://github.com/kimsungwhee/apple-docs-mcp/issues/new) • [文档](https://github.com/kimsungwhee/apple-docs-mcp)
+[报告问题](https://github.com/adv3nt3/apple-docs-mcp/issues) • [请求功能](https://github.com/adv3nt3/apple-docs-mcp/issues/new) • [文档](https://github.com/adv3nt3/apple-docs-mcp)
 
 </div>

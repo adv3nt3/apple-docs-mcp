@@ -2,6 +2,84 @@
  * Tests for error handler utilities
  */
 
+import { appError, ErrorType } from '../../src/utils/error-handler.js';
+
+describe('appError factory (real implementation)', () => {
+  it('returns the canonical { type, message, suggestions, originalError } shape', () => {
+    const err = appError(ErrorType.INVALID_INPUT, 'bad input');
+
+    expect(err).toEqual({
+      type: ErrorType.INVALID_INPUT,
+      message: 'bad input',
+      suggestions: undefined,
+      originalError: undefined,
+    });
+  });
+
+  it('preserves passed suggestions and originalError', () => {
+    const cause = new Error('upstream failure');
+    const err = appError(ErrorType.NETWORK_ERROR, 'network error', {
+      suggestions: ['Try again', 'Check connectivity'],
+      originalError: cause,
+    });
+
+    expect(err.type).toBe(ErrorType.NETWORK_ERROR);
+    expect(err.message).toBe('network error');
+    expect(err.suggestions).toEqual(['Try again', 'Check connectivity']);
+    expect(err.originalError).toBe(cause);
+  });
+
+  it('leaves suggestions undefined when not passed', () => {
+    const err = appError(ErrorType.NOT_FOUND, 'missing');
+    expect(err.suggestions).toBeUndefined();
+  });
+
+  it('coerces a non-Error originalError option to undefined', () => {
+    // Defensive: a string passed as originalError must NOT survive into
+    // the AppError. Otherwise downstream code that assumes
+    // originalError is Error|undefined would break.
+    const err = appError(ErrorType.UNKNOWN, 'odd', {
+      originalError: 'this is not an Error' as unknown as Error,
+    });
+    expect(err.originalError).toBeUndefined();
+  });
+
+  it('coerces null/false/object originalError options to undefined', () => {
+    const cases: unknown[] = [null, false, 0, { not: 'an error' }, []];
+    for (const c of cases) {
+      const err = appError(ErrorType.UNKNOWN, 'odd', {
+        originalError: c as Error,
+      });
+      expect(err.originalError).toBeUndefined();
+    }
+  });
+
+  it('passes the duck-type check used by handleAsyncOperation in src/index.ts', () => {
+    // src/index.ts:handleAsyncOperation routes thrown values through the
+    // tool error response if they look like an AppError. The check is:
+    //   error && typeof error === 'object' && 'type' in error && 'message' in error
+    const err = appError(ErrorType.INVALID_INPUT, 'bad input');
+    expect(err && typeof err === 'object' && 'type' in err && 'message' in err).toBe(true);
+  });
+
+  it.each([
+    ErrorType.NETWORK_ERROR,
+    ErrorType.PARSE_ERROR,
+    ErrorType.NOT_FOUND,
+    ErrorType.INVALID_INPUT,
+    ErrorType.TIMEOUT,
+    ErrorType.RATE_LIMITED,
+    ErrorType.API_ERROR,
+    ErrorType.CACHE_ERROR,
+    ErrorType.VALIDATION_ERROR,
+    ErrorType.SERVICE_UNAVAILABLE,
+    ErrorType.UNKNOWN,
+  ])('round-trips ErrorType.%s', (type) => {
+    const err = appError(type, 'msg');
+    expect(err.type).toBe(type);
+  });
+});
+
 describe('Error Handler', () => {
   describe('Error Types', () => {
     it('should define error types', () => {

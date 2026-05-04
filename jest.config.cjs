@@ -15,6 +15,15 @@ module.exports = {
       useESM: false,
       tsconfig: {
         module: 'commonjs',
+        // 'bundler' is the modern, version-agnostic resolver designed for tools
+        // like Jest/Vite/esbuild. Pairs with module:commonjs without TS 6's
+        // node10-deprecation warning, and unlike node16/nodenext doesn't force
+        // strict ESM file-extension rules in test code.
+        moduleResolution: 'bundler',
+        // ts-jest has historically forced node10 when module:commonjs; until
+        // that's resolved upstream, silence the TS 6 deprecation warning so
+        // jest doesn't refuse to run.
+        ignoreDeprecations: '6.0',
         experimentalDecorators: true,
         emitDecoratorMetadata: true
       }

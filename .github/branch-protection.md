@@ -44,7 +44,7 @@ Add these secrets in Settings → Secrets and variables → Actions:
 Add these badges to your README.md:
 
 ```markdown
-[![CI](https://github.com/kimsungwhee/apple-docs-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/kimsungwhee/apple-docs-mcp/actions/workflows/ci.yml)
-[![npm version](https://badge.fury.io/js/@kimsungwhee%2Fapple-docs-mcp.svg)](https://www.npmjs.com/package/@kimsungwhee/apple-docs-mcp)
+[![CI](https://github.com/adv3nt3/apple-docs-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/adv3nt3/apple-docs-mcp/actions/workflows/ci.yml)
+[![npm version](https://badge.fury.io/js/@adv3nt3%2Fapple-docs-mcp.svg)](https://www.npmjs.com/package/@adv3nt3/apple-docs-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ```
