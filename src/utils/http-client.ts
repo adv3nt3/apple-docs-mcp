@@ -375,7 +375,7 @@ class HttpClient {
     try {
       const response = await this.get(url, options);
       const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.toLowerCase().includes('application/json')) {
+      if (!contentType?.toLowerCase().includes('application/json')) {
         throw appError(ErrorType.PARSE_ERROR, 'Unexpected response content-type from upstream', {
           suggestions: ['The upstream API returned non-JSON content'],
         });

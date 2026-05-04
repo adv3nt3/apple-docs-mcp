@@ -7,6 +7,7 @@ jest.mock('../../src/utils/http-client.js');
 jest.mock('../../src/utils/url-converter.js', () => ({
   convertToJsonApiUrl: jest.fn(),
   isValidAppleDeveloperUrl: jest.fn().mockReturnValue(true),
+  assertAppleDeveloperUrl: jest.fn(),
 }));
 
 const mockHttpClient = httpClient as jest.Mocked<typeof httpClient>;

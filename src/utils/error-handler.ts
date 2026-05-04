@@ -39,7 +39,7 @@ const SAFE_ERROR_MESSAGES: Record<ErrorType, string> = {
 export function appError(
   type: ErrorType,
   message: string,
-  options: { suggestions?: string[]; originalError?: Error | unknown } = {},
+  options: { suggestions?: string[]; originalError?: unknown } = {},
 ): AppError {
   return {
     type,
