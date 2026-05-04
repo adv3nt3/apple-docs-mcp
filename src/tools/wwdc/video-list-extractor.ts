@@ -78,11 +78,8 @@ export async function extractVideoList(year: string): Promise<VideoListItem[]> {
  * Extract video information from element
  */
 function extractVideoFromElement(element: Element, year: string): VideoListItem | null {
-  // Extract video ID
-  let id: string | null = null;
-
-  // Get from data attribute
-  id = element.getAttribute('data-video-id');
+  // Extract video ID — first try the data attribute, then fall back to the link href.
+  let id: string | null = element.getAttribute('data-video-id');
 
   // Get from link
   if (!id) {

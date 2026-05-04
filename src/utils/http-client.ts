@@ -314,7 +314,7 @@ class HttpClient {
     customHeaders: Record<string, string> = {},
     acceptOverride?: string,
   ): Promise<Record<string, string>> {
-    let requestHeaders: Record<string, string> = {};
+    let requestHeaders: Record<string, string>;
 
     try {
       // Initialize User-Agent pool and headers generator
