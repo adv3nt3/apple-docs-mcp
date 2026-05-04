@@ -17,7 +17,8 @@ describe('HTTP Client Headers Integration', () => {
       statusText: 'OK',
       json: () => Promise.resolve({ success: true }),
       text: () => Promise.resolve('success'),
-      headers: new Headers(),
+      // Include application/json content-type so L2 Content-Type check passes.
+      headers: new Headers({ 'content-type': 'application/json' }),
     });
   });
 

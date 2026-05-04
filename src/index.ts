@@ -23,7 +23,7 @@ import { httpClient } from './utils/http-client.js';
 import { preloadPopularFrameworks } from './utils/preloader.js';
 import { warmUpCaches, schedulePeriodicCacheRefresh } from './utils/cache-warmer.js';
 import { logger } from './utils/logger.js';
-import { API_LIMITS } from './utils/constants.js';
+import { API_LIMITS, RECURSION_LIMITS } from './utils/constants.js';
 
 export default class AppleDeveloperDocsMCPServer {
   private server: Server;
@@ -161,7 +161,7 @@ export default class AppleDeveloperDocsMCPServer {
         includeReferences,
         includeSimilarApis,
         includePlatformAnalysis,
-      });
+      }, RECURSION_LIMITS.MAX_DOC_FETCH_DEPTH);
     } catch (error) {
       if (error && typeof error === 'object' && 'type' in error) {
         return createToolErrorResponse(error as any, 'get_apple_doc_content');
@@ -276,14 +276,14 @@ export default class AppleDeveloperDocsMCPServer {
       process.exit(0);
     });
 
+    // Log and continue rather than exiting: this is a stateless docs proxy where
+    // killing the server denies service to all in-flight tool calls (DoS amplifier).
     process.on('unhandledRejection', (reason) => {
       logger.error('Unhandled Rejection, reason:', reason);
-      process.exit(1);
     });
 
     process.on('uncaughtException', (error) => {
       logger.error('Uncaught Exception:', error);
-      process.exit(1);
     });
   }
 

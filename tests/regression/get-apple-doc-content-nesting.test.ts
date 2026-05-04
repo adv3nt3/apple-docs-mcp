@@ -100,7 +100,8 @@ describe('getAppleDocContent Nested Response Regression Tests', () => {
       expect(contentItem.text).not.toHaveProperty('content');
       expect(typeof contentItem.text).not.toBe('object');
 
-      // Verify fetchAppleDocJson was called correctly
+      // Verify fetchAppleDocJson was called correctly. Third arg is the
+      // explicit recursion-depth limit added by security fix M3.
       expect(mockFetchAppleDocJson).toHaveBeenCalledWith(
         'https://developer.apple.com/documentation/uikit/uiviewcontroller',
         {
@@ -108,7 +109,8 @@ describe('getAppleDocContent Nested Response Regression Tests', () => {
           includeReferences: false,
           includeSimilarApis: false,
           includePlatformAnalysis: false,
-        }
+        },
+        2
       );
     });
 
@@ -141,7 +143,8 @@ describe('getAppleDocContent Nested Response Regression Tests', () => {
       // Ensure no nesting occurred
       expect(contentItem.text).not.toHaveProperty('content');
 
-      // Verify enhanced options were passed correctly
+      // Verify enhanced options were passed correctly. Third arg is the
+      // explicit recursion-depth limit added by security fix M3.
       expect(mockFetchAppleDocJson).toHaveBeenCalledWith(
         'https://developer.apple.com/documentation/swiftui/view',
         {
@@ -149,7 +152,8 @@ describe('getAppleDocContent Nested Response Regression Tests', () => {
           includeReferences: true,
           includeSimilarApis: true,
           includePlatformAnalysis: true,
-        }
+        },
+        2
       );
     });
 

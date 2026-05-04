@@ -35,6 +35,12 @@ export const SEARCH_DEPTH_LIMITS = {
   deep: 15,
 } as const;
 
+// Recursion Limits Configuration
+// Hard ceiling for recursive doc fetches to prevent unbounded resource use.
+export const RECURSION_LIMITS = {
+  MAX_DOC_FETCH_DEPTH: 2,
+} as const;
+
 // Cache TTL Configuration (in milliseconds)
 export const CACHE_TTL = {
   API_DOCS: 30 * 60 * 1000,      // 30 minutes
