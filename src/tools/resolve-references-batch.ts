@@ -1,7 +1,6 @@
-import { convertToJsonApiUrl, isValidAppleDeveloperUrl } from '../utils/url-converter.js';
+import { assertAppleDeveloperUrl, convertToJsonApiUrl } from '../utils/url-converter.js';
 import { httpClient } from '../utils/http-client.js';
 import { logger } from '../utils/logger.js';
-import { ErrorType } from '../utils/error-handler.js';
 
 /**
  * 解析的引用信息接口
@@ -55,9 +54,7 @@ export async function handleResolveReferencesBatch(
   maxReferences: number = 20,
   filterByType: string = 'all',
 ): Promise<string> {
-  if (!isValidAppleDeveloperUrl(sourceUrl)) {
-    throw { type: ErrorType.INVALID_INPUT, message: 'URL must be from developer.apple.com' };
-  }
+  assertAppleDeveloperUrl(sourceUrl);
   try {
     logger.info(`Resolving references from: ${sourceUrl}`);
 
