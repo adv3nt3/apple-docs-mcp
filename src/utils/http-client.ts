@@ -18,9 +18,10 @@
 
 import { REQUEST_CONFIG, ERROR_MESSAGES, PROCESSING_LIMITS, SAFARI_USER_AGENTS } from './constants.js';
 import { handleFetchError } from './error-handler.js';
+import { HttpHeadersGenerator } from './http-headers-generator.js';
+import { logger } from './logger.js';
 import { globalRateLimiter } from './rate-limiter.js';
 import { UserAgentPool } from './user-agent-pool.js';
-import { HttpHeadersGenerator } from './http-headers-generator.js';
 import type { HeaderGeneratorConfig } from '../types/headers.js';
 
 /**
@@ -83,7 +84,7 @@ function initializeUserAgentPool(): UserAgentPool | null {
     return userAgentPool;
   } catch (error) {
     // Fallback: Pool initialization failed, will use static User-Agent
-    console.warn('UserAgentPool initialization failed, falling back to static User-Agent:', error);
+    logger.warn('UserAgentPool initialization failed, falling back to static User-Agent:', error);
     return null;
   }
 }
@@ -110,7 +111,7 @@ function initializeHeadersGenerator(): HttpHeadersGenerator | null {
     headersGenerator = HttpHeadersGenerator.getInstance(config);
     return headersGenerator;
   } catch (error) {
-    console.warn('HttpHeadersGenerator initialization failed, falling back to basic headers:', error);
+    logger.warn('HttpHeadersGenerator initialization failed, falling back to basic headers:', error);
     return null;
   }
 }
@@ -342,7 +343,7 @@ class HttpClient {
       }
     } catch (error) {
       // Fallback to basic headers on any error
-      console.warn('Failed to generate enhanced headers, falling back to basic:', error);
+      logger.warn('Failed to generate enhanced headers, falling back to basic:', error);
       requestHeaders = {
         'User-Agent': REQUEST_CONFIG.DEFAULT_SAFARI_USER_AGENT || REQUEST_CONFIG.USER_AGENT,
         'Accept': acceptOverride || 'application/json',
