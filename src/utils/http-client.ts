@@ -105,6 +105,7 @@ function initializeHeadersGenerator(): HttpHeadersGenerator | null {
       enableDNT: process.env.DISABLE_DNT !== 'true',
       languageRotation: process.env.DISABLE_LANGUAGE_ROTATION !== 'true',
       simpleMode: process.env.SIMPLE_HEADERS_MODE === 'true',
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty-string env var should fall back to default
       defaultAcceptLanguage: process.env.DEFAULT_ACCEPT_LANGUAGE || 'en-US,en;q=0.9',
     };
 
@@ -219,6 +220,7 @@ class HttpClient {
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
         // Extract current User-Agent from pre-generated headers
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty-string User-Agent should normalize to null
         currentUserAgent = (options.headers as any)?.['User-Agent'] || null;
 
         const response = await fetch(url, options);
@@ -267,7 +269,7 @@ class HttpClient {
         // Don't retry on certain errors
         if (error instanceof Error) {
           if (error.name === 'AbortError') {
-            throw new Error(ERROR_MESSAGES.TIMEOUT);
+            throw new Error(ERROR_MESSAGES.TIMEOUT, { cause: error });
           }
           if (error.message.includes('404')) {
             throw error; // Don't retry 404s
@@ -335,6 +337,7 @@ class HttpClient {
         // Fallback to basic headers
         requestHeaders = {
           'User-Agent': REQUEST_CONFIG.DEFAULT_SAFARI_USER_AGENT || REQUEST_CONFIG.USER_AGENT,
+          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty-string acceptOverride should fall back to default
           'Accept': acceptOverride || 'application/json',
           'Accept-Encoding': 'gzip, deflate, br',
           'Accept-Language': 'en-US,en;q=0.9',
@@ -346,6 +349,7 @@ class HttpClient {
       logger.warn('Failed to generate enhanced headers, falling back to basic:', error);
       requestHeaders = {
         'User-Agent': REQUEST_CONFIG.DEFAULT_SAFARI_USER_AGENT || REQUEST_CONFIG.USER_AGENT,
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty-string acceptOverride should fall back to default
         'Accept': acceptOverride || 'application/json',
         'Accept-Encoding': 'gzip, deflate',
         'Accept-Language': 'en-US,en;q=0.9',

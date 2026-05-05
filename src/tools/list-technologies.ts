@@ -92,6 +92,7 @@ function parseTechnologies(data: TechnologiesData): TechnologyGroup[] {
           if (group.technologies && Array.isArray(group.technologies)) {
             const technologies: Technology[] = group.technologies.map(tech => ({
               title: tech.title || '',
+              // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty-string identifier should fall through to next candidate
               identifier: tech.destination?.identifier || tech.identifier || '',
               tags: tech.tags || [],
               languages: tech.languages || [],
@@ -210,6 +211,7 @@ function formatTechnologiesList(groups: TechnologyGroup[]): string {
       const isBeta = tech.tags.includes('Beta');
       const titleWithStatus = isBeta ? `${tech.title} (Beta)` : tech.title;
 
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty-string url should fall back to '#'
       content += `### [${titleWithStatus}](${tech.url || '#'})\n`;
 
       // Build metadata array

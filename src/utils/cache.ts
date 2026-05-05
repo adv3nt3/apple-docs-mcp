@@ -41,7 +41,13 @@ export class MemoryCache {
   }
 
   /**
-   * Get value from cache
+   * Get value from cache.
+   *
+   * Implements LRU recency by re-inserting the entry on every hit so that
+   * `Map`'s insertion-order iteration moves the touched key to the end. The
+   * eviction path in `set()` removes the first key, which is therefore always
+   * the least-recently-used entry. The original `CacheEntry` (timestamp + ttl)
+   * is preserved — touching a key does NOT extend its TTL.
    */
   get<T>(key: string): T | undefined {
     const entry = this.cache.get(key);
@@ -56,6 +62,11 @@ export class MemoryCache {
       this.misses++;
       return undefined;
     }
+
+    // LRU touch: remove + reinsert so this key becomes the most-recently-used
+    // in `Map`'s insertion order, protecting it from the next eviction wave.
+    this.cache.delete(key);
+    this.cache.set(key, entry);
 
     this.hits++;
     return entry.data as T;

@@ -181,7 +181,9 @@ describe('find-similar-apis', () => {
     it('should handle fetch errors gracefully', async () => {
       mockHttpClient.getJson.mockRejectedValue(new Error('Network error'));
 
-      await expect(handleFindSimilarApis(mockApiUrl)).rejects.toThrow('Network error');
+      await expect(handleFindSimilarApis(mockApiUrl)).rejects.toMatchObject({
+        message: expect.stringContaining('Network error'),
+      });
     });
 
     it('should deduplicate similar APIs across sections', async () => {

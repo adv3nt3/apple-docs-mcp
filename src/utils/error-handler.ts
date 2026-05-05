@@ -35,17 +35,20 @@ const SAFE_ERROR_MESSAGES: Record<ErrorType, string> = {
  * Single source of truth for AppError construction. Prefer this factory over
  * inline `{ type, message, ... }` literals so the shape stays enforced and
  * future-proof against field additions.
+ *
+ * Pass `cause` (preferred) or `originalError` (legacy) to attach the underlying error for debugging.
  */
 export function appError(
   type: ErrorType,
   message: string,
-  options: { suggestions?: string[]; originalError?: unknown } = {},
+  options: { suggestions?: string[]; cause?: unknown; originalError?: unknown } = {},
 ): AppError {
+  const cause = options.cause !== undefined ? options.cause : options.originalError;
   return {
     type,
     message,
     suggestions: options.suggestions,
-    originalError: options.originalError instanceof Error ? options.originalError : undefined,
+    originalError: cause instanceof Error ? cause : undefined,
   };
 }
 
@@ -217,6 +220,7 @@ export function handleGenericError(error: unknown, context: string, fallbackMess
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty-string fallbackMessage should fall back to context-derived default
   return appError(ErrorType.UNKNOWN, fallbackMessage || `An error occurred in ${context}`, {
     suggestions: [
       'Try again later',

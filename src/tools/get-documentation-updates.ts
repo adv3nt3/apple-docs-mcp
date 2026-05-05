@@ -229,6 +229,7 @@ function applyUpdatesFilters(
   if (filters.technology) {
     const techLower = filters.technology.toLowerCase();
     filtered = filtered.filter(update =>
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- boolean fallthrough between .includes() results
       (update.technology?.toLowerCase().includes(techLower)) ||
       update.title.toLowerCase().includes(techLower) ||
       update.description.toLowerCase().includes(techLower),

@@ -44,10 +44,10 @@ export async function extractAllTopics(): Promise<Topic[]> {
     const topicLinks = document.querySelectorAll('a[href*="/videos/"]');
 
     topicLinks.forEach((link: Element) => {
-      const href = link.getAttribute('href') || '';
+      const href = link.getAttribute('href') ?? '';
 
       // Look for topic links in different formats
-      const match = href.match(/\/videos\/topics\/([a-z-]+)/) ||
+      const match = href.match(/\/videos\/topics\/([a-z-]+)/) ??
                   href.match(/\/videos\/([a-z-]+)\/?$/);
 
       if (match && !href.includes('/play/')) {
@@ -60,8 +60,8 @@ export async function extractAllTopics(): Promise<Topic[]> {
         }
 
         // Extract name from heading or link text
-        const heading = link.querySelector('h3, h4') || link;
-        const name = heading.textContent?.trim() || '';
+        const heading = link.querySelector('h3, h4') ?? link;
+        const name = heading.textContent?.trim() ?? '';
 
         if (!name) {
           return;
@@ -99,7 +99,10 @@ export async function extractAllTopics(): Promise<Topic[]> {
 
   } catch (error) {
     logger.error('Failed to extract topic categories:', error);
-    throw new Error(`Failed to extract topics: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Failed to extract topics: ${error instanceof Error ? error.message : String(error)}`,
+      { cause: error },
+    );
   }
 }
 
@@ -122,7 +125,7 @@ export async function extractTopicVideos(topicId: string): Promise<TopicVideo[]>
     const videoCards = document.querySelectorAll('a[href*="/videos/play/"]');
 
     videoCards.forEach((card: Element) => {
-      const href = card.getAttribute('href') || '';
+      const href = card.getAttribute('href') ?? '';
       const match = href.match(/\/videos\/play\/wwdc(\d{4})\/(\d+)\//);
 
       if (match) {
@@ -131,11 +134,11 @@ export async function extractTopicVideos(topicId: string): Promise<TopicVideo[]>
 
         // Extract title
         const titleEl = card.querySelector('h4, .title, [class*="title"]');
-        const title = titleEl?.textContent?.trim() || '';
+        const title = titleEl?.textContent?.trim() ?? '';
 
         // Extract duration
         const durationEl = card.querySelector('.video-duration, [class*="duration"], time');
-        const duration = durationEl?.textContent?.trim() || '';
+        const duration = durationEl?.textContent?.trim() ?? '';
 
         // Extract description
         const descEl = card.querySelector('p, .description, [class*="description"]');
@@ -143,7 +146,7 @@ export async function extractTopicVideos(topicId: string): Promise<TopicVideo[]>
 
         // Extract thumbnail
         const imgEl = card.querySelector('img');
-        const thumbnail = imgEl?.getAttribute('src') || imgEl?.getAttribute('data-src') || undefined;
+        const thumbnail = imgEl?.getAttribute('src') ?? imgEl?.getAttribute('data-src') ?? undefined;
 
         if (title) {
           videos.push({

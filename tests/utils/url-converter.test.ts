@@ -65,6 +65,19 @@ describe('URL Converter', () => {
         expect(isValidAppleDeveloperUrl(url)).toBe(false);
       });
     });
+
+    // Regression: even when the hostname matches developer.apple.com, only
+    // http(s) protocols may pass. Anything else (ftp, file, javascript, data)
+    // is rejected to keep the SSRF surface tight (fix follow-up to H2).
+    it.each([
+      'ftp://developer.apple.com/foo',
+      'file:///developer.apple.com',
+      'file://developer.apple.com/etc/passwd',
+      'javascript://developer.apple.com/%0aalert(1)',
+      'data://developer.apple.com/text/plain;base64,Zm9v',
+    ])('should reject non-http(s) protocol %s', (url) => {
+      expect(isValidAppleDeveloperUrl(url)).toBe(false);
+    });
   });
 
   describe('extractApiNameFromUrl', () => {
@@ -124,6 +137,12 @@ describe('URL Converter', () => {
       // Substring-attack regression: just having developer.apple.com in
       // the URL anywhere must not be enough.
       'https://attacker.example/developer.apple.com/path',
+      // Protocol-smuggling regression: even when the hostname parses to
+      // developer.apple.com, non-http(s) protocols must be rejected so
+      // they cannot reach the upstream fetch path.
+      'ftp://developer.apple.com/foo',
+      'file:///developer.apple.com',
+      'file://developer.apple.com/etc/passwd',
     ])('throws an INVALID_INPUT AppError for %j', (url) => {
       let caught: unknown;
       try {

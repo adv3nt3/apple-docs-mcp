@@ -25,38 +25,47 @@ Apple 開発者ドキュメント MCP サーバー - モデルコンテキスト
 
 ## 🚀 クイックスタート
 
-### Claude Desktop（推奨）
+> **お知らせ**: `@adv3nt3/apple-docs-mcp` はまだ npm に公開されていないため、古いドキュメントの `npx` スニペットは 404 になります。最初の npm リリースまではソースからビルドしてください。元の `npx` 形式のスニペットは、インストールセクションの末尾「**npm 公開後**」に将来の参照用として保持されています。
 
-Claude Desktop 設定ファイルに以下を追加してください：
+### 1. ソースからビルド
 
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`  
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+```bash
+git clone https://github.com/adv3nt3/apple-docs-mcp.git
+cd apple-docs-mcp
+pnpm install --frozen-lockfile
+pnpm run build
+```
+
+`pnpm run build` は `tsc` を実行し、バンドルされた WWDC コーパスを `dist/` にコピーします。コンパイル済みのエントリポイントは `dist/index.js` です。
+
+### 2. MCP ホストへの組み込み
+
+`/absolute/path/to/apple-docs-mcp` をクローンしたパスに置き換えてください。
+
+**Claude Desktop** — `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) または `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
 
 ```json
 {
   "mcpServers": {
     "apple-docs": {
-      "command": "npx",
-      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
     }
   }
 }
 ```
 
-> **注意**: 古いバージョンが使用される問題が発生した場合、`@latest` を追加して最新バージョンを強制します：
-> ```json
-> "args": ["-y", "@adv3nt3/apple-docs-mcp@latest"]
-> ```
-
-Claude Desktop を再起動して Apple API について質問を始めましょう！
+Claude Desktop を再起動して Apple API について質問を始めましょう。
 
 ## 📦 インストール
+
+以下のホストはすべて同じパターンを使用します: `command: "node"` をローカルの `dist/index.js` への絶対パスに向けます。
 
 <details>
 <summary><strong>📱 Claude Code</strong></summary>
 
 ```bash
-claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
+claude mcp add apple-docs -- node /absolute/path/to/apple-docs-mcp/dist/index.js
 ```
 
 [📖 Claude Code MCP ドキュメント](https://docs.anthropic.com/en/docs/claude-code/mcp)
@@ -74,8 +83,8 @@ claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
 {
   "mcpServers": {
     "apple-docs": {
-      "command": "npx",
-      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
     }
   }
 }
@@ -96,8 +105,8 @@ VS Code MCP 設定に追加:
     "servers": {
       "apple-docs": {
         "type": "stdio",
-        "command": "npx",
-        "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+        "command": "node",
+        "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
       }
     }
   }
@@ -117,8 +126,8 @@ Windsurf MCP 設定に追加:
 {
   "mcpServers": {
     "apple-docs": {
-      "command": "npx",
-      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
     }
   }
 }
@@ -138,8 +147,8 @@ Zed の `settings.json` に追加:
   "context_servers": {
     "Apple Docs": {
       "command": {
-        "path": "npx",
-        "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+        "path": "node",
+        "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
       },
       "settings": {}
     }
@@ -154,18 +163,14 @@ Zed の `settings.json` に追加:
 <details>
 <summary><strong>🔧 Cline</strong></summary>
 
-**マーケットプレイス経由**:
-1. Cline を開く → メニュー (☰) → MCP サーバー → マーケットプレイス
-2. "Apple Docs MCP" を検索 → インストール
-
-**設定経由**: `cline_mcp_settings.json` に追加:
+`cline_mcp_settings.json` に追加:
 
 ```json
 {
   "mcpServers": {
     "apple-docs": {
-      "command": "npx",
-      "args": ["-y", "@adv3nt3/apple-docs-mcp"],
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"],
       "disabled": false,
       "autoApprove": []
     }
@@ -176,9 +181,70 @@ Zed の `settings.json` に追加:
 </details>
 
 <details>
+<summary><strong>Amazon Q Developer CLI</strong></summary>
+
+`~/.aws/amazonq/mcp.json` に追加:
+
+```json
+{
+  "mcpServers": {
+    "apple-docs": {
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
+    }
+  }
+}
+```
+
+[📖 Amazon Q Developer CLI MCP ドキュメント](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/qdev-mcp.html)
+
+</details>
+
+<details>
 <summary><strong>🪟 Windows</strong></summary>
 
-Windows システムの場合:
+同じ `node` 呼び出しが Windows でもパス区切り文字を入れ替えれば動作します。バックスラッシュをエスケープする方法:
+
+```json
+{
+  "mcpServers": {
+    "apple-docs": {
+      "command": "node",
+      "args": ["C:\\path\\to\\apple-docs-mcp\\dist\\index.js"]
+    }
+  }
+}
+```
+
+…またはスラッシュを使用してください — Node はどちらも受け付けます。
+
+</details>
+
+<details>
+<summary><strong>⚙️ npm 公開後</strong></summary>
+
+以下のスニペットは、`@adv3nt3/apple-docs-mcp` が npm に初めて公開される日のために保持されています。**現時点では動作しません** — パッケージがレジストリに存在するまで `npx` は 404 で失敗します。
+
+**Claude Desktop / Cursor / Windsurf / Cline / Amazon Q / VS Code**（すべて同じパターン）:
+
+```json
+{
+  "mcpServers": {
+    "apple-docs": {
+      "command": "npx",
+      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+    }
+  }
+}
+```
+
+**Claude Code**:
+
+```bash
+claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
+```
+
+**Windows**:
 
 ```json
 {
@@ -193,35 +259,10 @@ Windows システムの場合:
 }
 ```
 
-</details>
+**グローバルインストール**（公開後）:
 
-<details>
-<summary><strong>⚙️ 高度なインストール</strong></summary>
-
-**グローバルインストール**:
 ```bash
-# pnpm を使用（推奨）
-pnpm add -g @adv3nt3/apple-docs-mcp
-
-# npm を使用
-npm install -g @adv3nt3/apple-docs-mcp
-```
-
-**直接使用**:
-```bash
-npx @adv3nt3/apple-docs-mcp --help
-```
-
-**開発環境セットアップ**:
-```bash
-git clone https://github.com/adv3nt3/apple-docs-mcp.git
-cd apple-docs-mcp
-
-# pnpm を使用（推奨）
-pnpm install && pnpm run build
-
-# npm を使用
-npm install && npm run build
+pnpm add -g @adv3nt3/apple-docs-mcp   # または: npm install -g @adv3nt3/apple-docs-mcp
 ```
 
 </details>

@@ -158,7 +158,7 @@ const TOPIC_KEYWORDS: Record<string, StandardTopic[]> = {
  */
 export function inferTopics(title: string, description?: string): StandardTopic[] {
   const topics = new Set<StandardTopic>();
-  const searchText = `${title} ${description || ''}`.toLowerCase();
+  const searchText = `${title} ${description ?? ''}`.toLowerCase();
 
   // Iterate through all keywords
   for (const [keyword, mappedTopics] of Object.entries(TOPIC_KEYWORDS)) {

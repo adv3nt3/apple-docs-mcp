@@ -185,7 +185,7 @@ function processIndexSection(sections: TechnologyOverviewsIndexSection[], overvi
         identifier: section.path,
         path: section.path,
         depth,
-        sectionTitle: currentSection || '',
+        sectionTitle: currentSection ?? '',
       };
       overviews.push(newOverview);
     }
@@ -233,6 +233,7 @@ function applyOverviewsFilters(
 
     // If we found category items, also include their children
     if (categoryItems.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty-string path should fall through to url
       const categoryPaths = categoryItems.map(item => item.path || item.url);
 
       filtered = overviews.filter(overview => {
@@ -243,6 +244,7 @@ function applyOverviewsFilters(
 
         // Include children of category items
         if (overview.path || overview.url) {
+          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty-string path should fall through to url
           const overviewPath = (overview.path || overview.url).replace('https://developer.apple.com', '');
           return categoryPaths.some(categoryPath => {
             const cleanCategoryPath = categoryPath.replace('https://developer.apple.com', '');

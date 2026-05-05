@@ -26,38 +26,47 @@ Apple Developer Documentation MCP Server - Access Apple's official developer doc
 
 ## 🚀 Quick Start
 
-### Claude Desktop (Recommended)
+> **Heads up**: `@adv3nt3/apple-docs-mcp` has not been published to npm yet, so the `npx` snippets shown in older docs will 404. Build from source until the first npm release ships. The original `npx`-style snippets are preserved at the bottom of the install section under **Once published to npm** for future reference.
 
-Add this to your Claude Desktop configuration:
+### 1. Build from source
 
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`  
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+```bash
+git clone https://github.com/adv3nt3/apple-docs-mcp.git
+cd apple-docs-mcp
+pnpm install --frozen-lockfile
+pnpm run build
+```
+
+`pnpm run build` runs `tsc` and copies the bundled WWDC corpus into `dist/`. The compiled entry point is `dist/index.js`.
+
+### 2. Wire it into your MCP host
+
+Replace `/absolute/path/to/apple-docs-mcp` with the path you cloned into.
+
+**Claude Desktop** — `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
 
 ```json
 {
   "mcpServers": {
     "apple-docs": {
-      "command": "npx",
-      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
     }
   }
 }
 ```
 
-> **Note**: If you encounter issues with an old version being used, add `@latest` to force the latest version:
-> ```json
-> "args": ["-y", "@adv3nt3/apple-docs-mcp@latest"]
-> ```
-
-Restart Claude Desktop and start asking about Apple APIs!
+Restart Claude Desktop and start asking about Apple APIs.
 
 ## 📦 Installation
+
+Every host below uses the same pattern: point `command: "node"` at the absolute path to your local `dist/index.js`.
 
 <details>
 <summary><strong>📱 Claude Code</strong></summary>
 
 ```bash
-claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
+claude mcp add apple-docs -- node /absolute/path/to/apple-docs-mcp/dist/index.js
 ```
 
 [📖 Claude Code MCP docs](https://docs.anthropic.com/en/docs/claude-code/mcp)
@@ -75,8 +84,8 @@ claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
 {
   "mcpServers": {
     "apple-docs": {
-      "command": "npx",
-      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
     }
   }
 }
@@ -97,8 +106,8 @@ Add to your VS Code MCP config:
     "servers": {
       "apple-docs": {
         "type": "stdio",
-        "command": "npx",
-        "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+        "command": "node",
+        "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
       }
     }
   }
@@ -118,8 +127,8 @@ Add to your Windsurf MCP config:
 {
   "mcpServers": {
     "apple-docs": {
-      "command": "npx",
-      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
     }
   }
 }
@@ -139,8 +148,8 @@ Add to your Zed `settings.json`:
   "context_servers": {
     "Apple Docs": {
       "command": {
-        "path": "npx",
-        "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+        "path": "node",
+        "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
       },
       "settings": {}
     }
@@ -155,18 +164,14 @@ Add to your Zed `settings.json`:
 <details>
 <summary><strong>🔧 Cline</strong></summary>
 
-**Via Marketplace**:
-1. Open Cline → Menu (☰) → MCP Servers → Marketplace
-2. Search "Apple Docs MCP" → Install
-
-**Via Config**: Add to `cline_mcp_settings.json`:
+Add to `cline_mcp_settings.json`:
 
 ```json
 {
   "mcpServers": {
     "apple-docs": {
-      "command": "npx",
-      "args": ["-y", "@adv3nt3/apple-docs-mcp"],
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"],
       "disabled": false,
       "autoApprove": []
     }
@@ -177,9 +182,51 @@ Add to your Zed `settings.json`:
 </details>
 
 <details>
-<summary><strong> Amazon A Developer CLI</strong></summary>
+<summary><strong>Amazon Q Developer CLI</strong></summary>
 
-**Via Config File**: Add to `~/.aws/amazonq/mcp.json`:
+Add to `~/.aws/amazonq/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "apple-docs": {
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
+    }
+  }
+}
+```
+
+[📖 Amazon Q Developer CLI MCP docs](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/qdev-mcp.html)
+
+</details>
+
+<details>
+<summary><strong>🪟 Windows</strong></summary>
+
+The same `node` invocation works on Windows once you swap the path separators. Either escape backslashes:
+
+```json
+{
+  "mcpServers": {
+    "apple-docs": {
+      "command": "node",
+      "args": ["C:\\path\\to\\apple-docs-mcp\\dist\\index.js"]
+    }
+  }
+}
+```
+
+…or use forward slashes — Node accepts both.
+
+</details>
+
+<details>
+<summary><strong>⚙️ Once published to npm</strong></summary>
+
+The snippets below are preserved for the day `@adv3nt3/apple-docs-mcp` is first published to npm. **They do not work today** — `npx` will fail with a 404 until the package exists on the registry.
+
+**Claude Desktop / Cursor / Windsurf / Cline / Amazon Q / VS Code** (all same pattern):
 
 ```json
 {
@@ -192,14 +239,13 @@ Add to your Zed `settings.json`:
 }
 ```
 
-[📖 Amazon A Developer CLI MCP docs](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/qdev-mcp.html)
+**Claude Code**:
 
-</details>
+```bash
+claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
+```
 
-<details>
-<summary><strong>🪟 Windows</strong></summary>
-
-For Windows systems, use:
+**Windows**:
 
 ```json
 {
@@ -214,35 +260,10 @@ For Windows systems, use:
 }
 ```
 
-</details>
+**Global installation** (after publish):
 
-<details>
-<summary><strong>⚙️ Advanced Installation</strong></summary>
-
-**Global Installation**:
 ```bash
-# Using pnpm (recommended)
-pnpm add -g @adv3nt3/apple-docs-mcp
-
-# Using npm
-npm install -g @adv3nt3/apple-docs-mcp
-```
-
-**Direct Usage**:
-```bash
-npx @adv3nt3/apple-docs-mcp --help
-```
-
-**Development Setup**:
-```bash
-git clone https://github.com/adv3nt3/apple-docs-mcp.git
-cd apple-docs-mcp
-
-# Using pnpm (recommended)
-pnpm install && pnpm run build
-
-# Using npm
-npm install && npm run build
+pnpm add -g @adv3nt3/apple-docs-mcp   # or: npm install -g @adv3nt3/apple-docs-mcp
 ```
 
 </details>
@@ -471,6 +492,18 @@ The following environment variables (consumed in `src/utils/http-client.ts`) tun
 | `DISABLE_LANGUAGE_ROTATION` | Set to `true` to disable `Accept-Language` rotation | `false` |
 | `SIMPLE_HEADERS_MODE` | Set to `true` to send a minimal header set | `false` |
 | `DEFAULT_ACCEPT_LANGUAGE` | Override the default `Accept-Language` value | `en-US,en;q=0.9` |
+
+#### Logging & Diagnostics Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `MCP_LOG_LEVEL` | Minimum log level emitted on stderr (`debug`, `info`, `warn`, `error`; case-insensitive) | `info` |
+| `MCP_DEBUG` | Set to `true` to enable `debug`-level messages (in addition to `MCP_LOG_LEVEL`) | `false` |
+| `MCP_DIAGNOSTICS` | Set to `true` to expose the `get_performance_report` and `get_cache_stats` operator tools via `tools/list` | `false` |
+
+#### Operator diagnostics
+
+The server ships with two operator-grade diagnostic tools — `get_performance_report` and `get_cache_stats` — that surface HTTP client metrics, cache hit rates, framework preload status, and rate limiter state. These are useful for humans debugging the server but aren't actionable for AI assistants, so they're hidden from `tools/list` by default. Set `MCP_DIAGNOSTICS=true` in the server's environment (e.g., add `"env": { "MCP_DIAGNOSTICS": "true" }` to your MCP host config) to register them.
 
 ## 🧪 Development
 

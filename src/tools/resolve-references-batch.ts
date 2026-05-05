@@ -135,10 +135,10 @@ async function resolveReference(
     // 基本信息
     const resolved: ResolvedReference = {
       identifier,
-      title: refData.title || 'Unknown',
+      title: refData.title ?? 'Unknown',
       url: refData.url ? `https://developer.apple.com${refData.url}` : '#',
-      type: refData.type || 'unknown',
-      role: refData.role || 'unknown',
+      type: refData.type ?? 'unknown',
+      role: refData.role ?? 'unknown',
       kind: refData.kind,
       symbolKind: refData.symbolKind,
     };
@@ -146,7 +146,7 @@ async function resolveReference(
     // 处理摘要
     if (refData.abstract && Array.isArray(refData.abstract)) {
       resolved.abstract = refData.abstract
-        .map(item => item.text || '')
+        .map(item => item.text ?? '')
         .join(' ')
         .trim();
     }
@@ -154,18 +154,18 @@ async function resolveReference(
     // 处理代码片段
     if (refData.fragments && Array.isArray(refData.fragments)) {
       resolved.fragments = refData.fragments.map(fragment => ({
-        kind: fragment.kind || 'text',
-        text: fragment.text || '',
+        kind: fragment.kind ?? 'text',
+        text: fragment.text ?? '',
       }));
     }
 
     // 处理平台信息
     if (refData.platforms && Array.isArray(refData.platforms)) {
       resolved.platforms = refData.platforms.map(platform => ({
-        name: platform.name || 'Unknown',
+        name: platform.name ?? 'Unknown',
         introducedAt: platform.introducedAt,
-        beta: platform.beta || false,
-        deprecated: platform.deprecated || false,
+        beta: platform.beta ?? false,
+        deprecated: platform.deprecated ?? false,
       }));
     }
 
@@ -189,6 +189,7 @@ function formatResolvedReferences(
     return `No references could be resolved from: ${sourceUrl}`;
   }
 
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty-string title/path-segment should fall through to next candidate
   const title = sourceTitle || new URL(sourceUrl).pathname.split('/').pop() || 'Document';
   let content = `# References from ${title}\n\n`;
   content += `**Source:** [${sourceUrl}](${sourceUrl})\n\n`;

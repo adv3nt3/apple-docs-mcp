@@ -43,7 +43,7 @@ export async function extractVideoList(year: string): Promise<VideoListItem[]> {
       const videoLinks = document.querySelectorAll(`a[href*="/videos/play/wwdc${year}/"]`);
 
       videoLinks.forEach(link => {
-        const href = link.getAttribute('href') || '';
+        const href = link.getAttribute('href') ?? '';
         const match = href.match(/\/videos\/play\/wwdc\d+\/(\d+)\/?/);
 
         if (match) {
@@ -70,7 +70,10 @@ export async function extractVideoList(year: string): Promise<VideoListItem[]> {
 
   } catch (error) {
     logger.error(`Failed to extract video list for WWDC${year}:`, error);
-    throw new Error(`Failed to extract video list for WWDC${year}: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Failed to extract video list for WWDC${year}: ${error instanceof Error ? error.message : String(error)}`,
+      { cause: error },
+    );
   }
 }
 
@@ -83,8 +86,8 @@ function extractVideoFromElement(element: Element, year: string): VideoListItem 
 
   // Get from link
   if (!id) {
-    const link = element.querySelector('a[href*="/videos/play/"]') || element;
-    const href = link.getAttribute('href') || '';
+    const link = element.querySelector('a[href*="/videos/play/"]') ?? element;
+    const href = link.getAttribute('href') ?? '';
     const match = href.match(/\/videos\/play\/wwdc\d+\/(\d+)\/?/);
     if (match) {
       id = match[1];
@@ -139,7 +142,7 @@ function extractTitle(element: Element): string {
   // Get from image alt attribute
   const img = element.querySelector('img[alt]');
   if (img) {
-    const alt = img.getAttribute('alt') || '';
+    const alt = img.getAttribute('alt') ?? '';
     if (alt && !alt.toLowerCase().includes('thumbnail')) {
       return alt.trim();
     }
@@ -215,7 +218,7 @@ function extractDurationFromLink(link: Element): string {
 function extractThumbnail(element: Element): string {
   const img = element.querySelector('img[src*="devimages"], img.thumbnail, img.video-thumbnail');
   if (img) {
-    const src = img.getAttribute('src') || '';
+    const src = img.getAttribute('src') ?? '';
     if (src) {
       return src.startsWith('http') ? src : `${WWDC_URLS.BASE.replace('/videos', '')}${src}`;
     }
@@ -253,7 +256,7 @@ export async function getAvailableYears(): Promise<string[]> {
     const wwdcLinks = document.querySelectorAll('a[href*="/videos/wwdc"]');
 
     wwdcLinks.forEach(link => {
-      const href = link.getAttribute('href') || '';
+      const href = link.getAttribute('href') ?? '';
       const match = href.match(/wwdc(\d{2,4})/);
       if (match) {
         const year = match[1];

@@ -26,38 +26,47 @@ Apple 개발자 문서 MCP 서버 - 모델 컨텍스트 프로토콜을 통해 A
 
 ## 🚀 빠른 시작
 
-### Claude Desktop (권장)
+> **알림**: `@adv3nt3/apple-docs-mcp`는 아직 npm에 게시되지 않았으므로 이전 문서의 `npx` 스니펫은 404 오류를 반환합니다. 최초 npm 릴리스가 나올 때까지는 소스에서 빌드하세요. 원래의 `npx` 스타일 스니펫은 향후 참조를 위해 설치 섹션 하단의 **npm 게시 후** 항목에 보존되어 있습니다.
 
-Claude Desktop 구성 파일에 다음을 추가하세요:
+### 1. 소스에서 빌드
 
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`  
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+```bash
+git clone https://github.com/adv3nt3/apple-docs-mcp.git
+cd apple-docs-mcp
+pnpm install --frozen-lockfile
+pnpm run build
+```
+
+`pnpm run build`는 `tsc`를 실행하고 번들된 WWDC 코퍼스를 `dist/`로 복사합니다. 컴파일된 진입점은 `dist/index.js`입니다.
+
+### 2. MCP 호스트에 연결
+
+`/absolute/path/to/apple-docs-mcp`를 클론한 경로로 바꾸세요.
+
+**Claude Desktop** — `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) 또는 `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
 
 ```json
 {
   "mcpServers": {
     "apple-docs": {
-      "command": "npx",
-      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
     }
   }
 }
 ```
 
-> **참고**: 이전 버전이 사용되는 문제가 발생하면 `@latest`를 추가하여 최신 버전을 강제합니다:
-> ```json
-> "args": ["-y", "@adv3nt3/apple-docs-mcp@latest"]
-> ```
-
-Claude Desktop을 재시작하고 Apple API에 대해 질문해보세요!
+Claude Desktop을 재시작하고 Apple API에 대해 질문해보세요.
 
 ## 📦 설치
+
+아래의 모든 호스트는 동일한 패턴을 사용합니다: `command: "node"`를 로컬 `dist/index.js`의 절대 경로로 지정합니다.
 
 <details>
 <summary><strong>📱 Claude Code</strong></summary>
 
 ```bash
-claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
+claude mcp add apple-docs -- node /absolute/path/to/apple-docs-mcp/dist/index.js
 ```
 
 [📖 Claude Code MCP 문서](https://docs.anthropic.com/en/docs/claude-code/mcp)
@@ -75,8 +84,8 @@ claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
 {
   "mcpServers": {
     "apple-docs": {
-      "command": "npx",
-      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
     }
   }
 }
@@ -97,8 +106,8 @@ VS Code MCP 구성에 추가:
     "servers": {
       "apple-docs": {
         "type": "stdio",
-        "command": "npx",
-        "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+        "command": "node",
+        "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
       }
     }
   }
@@ -118,8 +127,8 @@ Windsurf MCP 구성에 추가:
 {
   "mcpServers": {
     "apple-docs": {
-      "command": "npx",
-      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
     }
   }
 }
@@ -139,8 +148,8 @@ Zed `settings.json`에 추가:
   "context_servers": {
     "Apple Docs": {
       "command": {
-        "path": "npx",
-        "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+        "path": "node",
+        "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
       },
       "settings": {}
     }
@@ -155,18 +164,14 @@ Zed `settings.json`에 추가:
 <details>
 <summary><strong>🔧 Cline</strong></summary>
 
-**마켓플레이스를 통해**:
-1. Cline 열기 → 메뉴 (☰) → MCP 서버 → 마켓플레이스
-2. "Apple Docs MCP" 검색 → 설치
-
-**구성을 통해**: `cline_mcp_settings.json`에 추가:
+`cline_mcp_settings.json`에 추가:
 
 ```json
 {
   "mcpServers": {
     "apple-docs": {
-      "command": "npx",
-      "args": ["-y", "@adv3nt3/apple-docs-mcp"],
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"],
       "disabled": false,
       "autoApprove": []
     }
@@ -177,16 +182,16 @@ Zed `settings.json`에 추가:
 </details>
 
 <details>
-<summary><strong> Amazon Q Developer CLI</strong></summary>
+<summary><strong>Amazon Q Developer CLI</strong></summary>
 
-**구성 파일을 통해**: `~/.aws/amazonq/mcp.json`에 추가:
+`~/.aws/amazonq/mcp.json`에 추가:
 
 ```json
 {
   "mcpServers": {
     "apple-docs": {
-      "command": "npx",
-      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+      "command": "node",
+      "args": ["/absolute/path/to/apple-docs-mcp/dist/index.js"]
     }
   }
 }
@@ -199,7 +204,48 @@ Zed `settings.json`에 추가:
 <details>
 <summary><strong>🪟 Windows</strong></summary>
 
-Windows 시스템의 경우:
+같은 `node` 호출이 경로 구분자만 바꾸면 Windows에서도 동작합니다. 백슬래시를 이스케이프하는 방법:
+
+```json
+{
+  "mcpServers": {
+    "apple-docs": {
+      "command": "node",
+      "args": ["C:\\path\\to\\apple-docs-mcp\\dist\\index.js"]
+    }
+  }
+}
+```
+
+…또는 슬래시를 사용하세요 — Node는 둘 다 받아들입니다.
+
+</details>
+
+<details>
+<summary><strong>⚙️ npm 게시 후</strong></summary>
+
+아래 스니펫은 `@adv3nt3/apple-docs-mcp`가 처음으로 npm에 게시되는 날을 위해 보존되어 있습니다. **현재는 작동하지 않습니다** — 패키지가 레지스트리에 존재할 때까지 `npx`는 404로 실패합니다.
+
+**Claude Desktop / Cursor / Windsurf / Cline / Amazon Q / VS Code** (모두 동일한 패턴):
+
+```json
+{
+  "mcpServers": {
+    "apple-docs": {
+      "command": "npx",
+      "args": ["-y", "@adv3nt3/apple-docs-mcp"]
+    }
+  }
+}
+```
+
+**Claude Code**:
+
+```bash
+claude mcp add apple-docs -- npx -y @adv3nt3/apple-docs-mcp@latest
+```
+
+**Windows**:
 
 ```json
 {
@@ -214,35 +260,10 @@ Windows 시스템의 경우:
 }
 ```
 
-</details>
+**전역 설치** (게시 후):
 
-<details>
-<summary><strong>⚙️ 고급 설치</strong></summary>
-
-**전역 설치**:
 ```bash
-# pnpm 사용 (권장)
-pnpm add -g @adv3nt3/apple-docs-mcp
-
-# npm 사용
-npm install -g @adv3nt3/apple-docs-mcp
-```
-
-**직접 사용**:
-```bash
-npx @adv3nt3/apple-docs-mcp --help
-```
-
-**개발 환경 설정**:
-```bash
-git clone https://github.com/adv3nt3/apple-docs-mcp.git
-cd apple-docs-mcp
-
-# pnpm 사용 (권장)
-pnpm install && pnpm run build
-
-# npm 사용
-npm install && npm run build
+pnpm add -g @adv3nt3/apple-docs-mcp   # 또는: npm install -g @adv3nt3/apple-docs-mcp
 ```
 
 </details>

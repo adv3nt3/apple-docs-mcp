@@ -86,7 +86,7 @@ async function analyzeSingleApiCompatibility(
   }
 
   const analysis = analyzeCompatibility(
-    data.metadata.title || 'Unknown API',
+    data.metadata.title ?? 'Unknown API',
     apiUrl,
     data.metadata.platforms,
   );
@@ -157,7 +157,7 @@ async function analyzeRelatedCompatibility(
           const relatedData = await httpClient.getJson<AppleDocData>(relatedJsonUrl);
           if (relatedData.metadata?.platforms) {
             const analysis = analyzeCompatibility(
-              ref.title || 'Unknown',
+              ref.title ?? 'Unknown',
               relatedUrl,
               relatedData.metadata.platforms,
             );

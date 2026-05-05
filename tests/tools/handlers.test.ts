@@ -29,14 +29,26 @@ jest.mock('../../src/tools/get-sample-code.js');
 // Mock wwdc-data-source to avoid import.meta.url issues
 jest.mock('../../src/utils/wwdc-data-source.js');
 
-// Mock WWDC handlers
-jest.mock('../../src/tools/wwdc/wwdc-handlers.js', () => ({
+// Mock WWDC handlers (one file per handler post-split)
+jest.mock('../../src/tools/wwdc/list-videos.js', () => ({
   handleListWWDCVideos: jest.fn().mockResolvedValue('WWDC Videos'),
+}));
+jest.mock('../../src/tools/wwdc/search-content.js', () => ({
   handleSearchWWDCContent: jest.fn().mockResolvedValue('WWDC Search Results'),
+}));
+jest.mock('../../src/tools/wwdc/get-video.js', () => ({
   handleGetWWDCVideo: jest.fn().mockResolvedValue('WWDC Video Details'),
+}));
+jest.mock('../../src/tools/wwdc/get-code-examples.js', () => ({
   handleGetWWDCCodeExamples: jest.fn().mockResolvedValue('WWDC Code Examples'),
+}));
+jest.mock('../../src/tools/wwdc/browse-topics.js', () => ({
   handleBrowseWWDCTopics: jest.fn().mockResolvedValue('WWDC Topics'),
+}));
+jest.mock('../../src/tools/wwdc/find-related-videos.js', () => ({
   handleFindRelatedWWDCVideos: jest.fn().mockResolvedValue('Related WWDC Videos'),
+}));
+jest.mock('../../src/tools/wwdc/list-years.js', () => ({
   handleListWWDCYears: jest.fn().mockResolvedValue('WWDC Years'),
 }));
 
@@ -93,18 +105,18 @@ describe('Tool dispatch (registerAllTools via in-memory transport)', () => {
   });
 
   describe('tools/list', () => {
-    it('exposes every production tool', async () => {
+    it('exposes every production tool (diagnostics hidden by default)', async () => {
       const { tools } = await client.listTools();
       const names = tools.map(t => t.name).sort();
 
+      // Diagnostic tools (`get_performance_report`, `get_cache_stats`) are
+      // gated behind `MCP_DIAGNOSTICS=true` and are NOT expected here.
       expect(names).toEqual([
         'browse_wwdc_topics',
         'find_related_wwdc_videos',
         'find_similar_apis',
         'get_apple_doc_content',
-        'get_cache_stats',
         'get_documentation_updates',
-        'get_performance_report',
         'get_platform_compatibility',
         'get_related_apis',
         'get_sample_code',
@@ -119,6 +131,30 @@ describe('Tool dispatch (registerAllTools via in-memory transport)', () => {
         'search_framework_symbols',
         'search_wwdc_content',
       ]);
+    });
+
+    it('exposes diagnostic tools when MCP_DIAGNOSTICS=true', async () => {
+      // Tear down the default client (which was built without diagnostics)
+      // and rebuild one with the env var set so the gating branch fires.
+      await cleanup();
+      const previous = process.env.MCP_DIAGNOSTICS;
+      process.env.MCP_DIAGNOSTICS = 'true';
+      try {
+        ({ client, cleanup } = await createTestMcpClient());
+        const { tools } = await client.listTools();
+        const names = tools.map(t => t.name);
+
+        expect(names).toEqual(expect.arrayContaining([
+          'get_performance_report',
+          'get_cache_stats',
+        ]));
+      } finally {
+        if (previous === undefined) {
+          delete process.env.MCP_DIAGNOSTICS;
+        } else {
+          process.env.MCP_DIAGNOSTICS = previous;
+        }
+      }
     });
   });
 

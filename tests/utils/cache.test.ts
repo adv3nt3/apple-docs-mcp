@@ -62,12 +62,50 @@ describe('Cache System', () => {
       cache.set('key2', 'value2');
       cache.set('key3', 'value3');
       cache.set('key4', 'value4'); // Should evict key1
-      
+
       expect(cache.get('key1')).toBeUndefined();
       expect(cache.get('key2')).toBe('value2');
       expect(cache.get('key3')).toBe('value3');
       expect(cache.get('key4')).toBe('value4');
       expect(cache.size()).toBe(3);
+    });
+
+    // ---- LRU semantics --------------------------------------------------
+    //
+    // Under the previous FIFO behavior, eviction always took the
+    // oldest-by-insertion entry — even if it had been read 1000 times since.
+    // The new touch-on-get behavior bumps a hit key to the most-recently-used
+    // position, so the next eviction wave kills a colder key instead.
+    it('promotes a key to MRU on get(), surviving an eviction wave', () => {
+      cache.set('key1', 'value1');
+      cache.set('key2', 'value2');
+      cache.set('key3', 'value3');
+
+      // Touch key1 — under FIFO it would still be the next to be evicted.
+      // Under LRU semantics it should now be the most-recently-used and key2
+      // (now the oldest untouched key) should be evicted instead.
+      expect(cache.get('key1')).toBe('value1');
+
+      cache.set('key4', 'value4');
+
+      expect(cache.get('key1')).toBe('value1'); // survived
+      expect(cache.get('key2')).toBeUndefined(); // evicted (oldest untouched)
+      expect(cache.get('key3')).toBe('value3');
+      expect(cache.get('key4')).toBe('value4');
+    });
+
+    it('preserves the original timestamp on get() (touch does NOT reset TTL)', async () => {
+      cache.set('key1', 'value1', 100); // 100ms TTL
+
+      // Touch the key immediately so it's at MRU position.
+      expect(cache.get('key1')).toBe('value1');
+
+      // Wait past the original TTL.
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      // The touch from the earlier get() must NOT have extended the TTL —
+      // the entry should still expire at the original timestamp + ttl.
+      expect(cache.get('key1')).toBeUndefined();
     });
 
     it('should return correct size', () => {

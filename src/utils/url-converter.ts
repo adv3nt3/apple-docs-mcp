@@ -50,14 +50,18 @@ export function convertToJsonApiUrl(webUrl: string): string | null {
 }
 
 /**
- * Validate if URL is from Apple Developer domain
+ * Validate if URL is from Apple Developer domain. Also asserts an http(s)
+ * protocol so URL strings like `ftp://developer.apple.com/foo` or
+ * `file:///developer.apple.com` cannot smuggle past the SSRF guard — they
+ * parse to a matching hostname but should never be fetched.
  * @param url The URL to validate
  * @returns True if valid Apple Developer URL
  */
 export function isValidAppleDeveloperUrl(url: string): boolean {
   try {
     const urlObj = new URL(url);
-    return urlObj.hostname === 'developer.apple.com';
+    return urlObj.hostname === 'developer.apple.com'
+      && (urlObj.protocol === 'https:' || urlObj.protocol === 'http:');
   } catch {
     return false;
   }
@@ -81,6 +85,7 @@ export function assertAppleDeveloperUrl(url: string): void {
  */
 export function extractApiNameFromUrl(url: string): string {
   try {
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty-string path segment should fall back to 'Unknown API'
     return new URL(url).pathname.split('/').pop() || 'Unknown API';
   } catch {
     return 'Unknown API';

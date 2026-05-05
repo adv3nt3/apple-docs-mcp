@@ -215,6 +215,7 @@ function deduplicateSampleCodes(sampleCodes: ParsedSampleCode[]): ParsedSampleCo
       uniqueCodes.set(code.path, code);
     } else {
       // Merge properties, preferring non-empty values
+      /* eslint-disable @typescript-eslint/prefer-nullish-coalescing -- intentional falsy fallthrough: empty strings/false should yield to existing values */
       uniqueCodes.set(code.path, {
         ...existing,
         framework: code.framework || existing.framework,
@@ -222,6 +223,7 @@ function deduplicateSampleCodes(sampleCodes: ParsedSampleCode[]): ParsedSampleCo
         beta: code.beta || existing.beta,
         depth: Math.min(code.depth, existing.depth),
       });
+      /* eslint-enable @typescript-eslint/prefer-nullish-coalescing */
     }
   }
 
@@ -256,6 +258,7 @@ function processSampleCodeNodes(
 
       // Priority: path > map > groupMarker
       const framework = normalizeFrameworkName(
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty-string framework should fall through to next priority candidate
         frameworkFromPath || frameworkFromMap || currentFramework,
       );
 
@@ -264,7 +267,7 @@ function processSampleCodeNodes(
         title: node.title,
         framework: framework || undefined,
         description: undefined, // Could be extracted from the content if needed
-        beta: node.beta || false,
+        beta: node.beta ?? false,
         featured: featuredIds.has(docUrl),
         url: `https://developer.apple.com${node.path}`,
         path: node.path,
@@ -310,7 +313,7 @@ function applySampleCodeFilters(sampleCodes: ParsedSampleCode[], filters: Sample
     // Framework filter - normalize both for comparison
     if (filters.framework) {
       const normalizedFilterFramework = normalizeFrameworkName(filters.framework);
-      const normalizedCodeFramework = normalizeFrameworkName(code.framework || '');
+      const normalizedCodeFramework = normalizeFrameworkName(code.framework ?? '');
 
       // Check for exact match or inclusion
       const frameworkLower = normalizedFilterFramework.toLowerCase();
@@ -355,7 +358,7 @@ function applySampleCodeFilters(sampleCodes: ParsedSampleCode[], filters: Sample
       }
 
       // Framework match
-      const frameworkLower = (code.framework || '').toLowerCase();
+      const frameworkLower = (code.framework ?? '').toLowerCase();
       if (frameworkLower.includes(query)) {
         matchScore += 2;
       }
@@ -367,7 +370,7 @@ function applySampleCodeFilters(sampleCodes: ParsedSampleCode[], filters: Sample
       }
 
       // Description match (if available)
-      const descriptionLower = (code.description || '').toLowerCase();
+      const descriptionLower = (code.description ?? '').toLowerCase();
       if (descriptionLower.includes(query)) {
         matchScore += 1;
       }
@@ -433,7 +436,7 @@ function formatSampleCodeResult(
   const noCategory: ParsedSampleCode[] = [];
 
   for (const code of sampleCodes) {
-    const category = code.framework || '';
+    const category = code.framework ?? '';
     if (category) {
       // Group WWDC samples together
       const normalizedCategory = category.match(/^WWDC\d+$/i) ? category.toUpperCase() : category;
