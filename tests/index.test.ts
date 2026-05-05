@@ -55,7 +55,9 @@ describe('AppleDeveloperDocsMCPServer', () => {
       const names = tools.map(t => t.name);
 
       // Spot-check a handful from each category — full enumeration is in
-      // tests/tools/handlers.test.ts.
+      // tests/tools/handlers.test.ts. Diagnostic tools (`get_performance_report`,
+      // `get_cache_stats`) are gated behind MCP_DIAGNOSTICS=true and are NOT
+      // expected in the default surface.
       expect(names).toEqual(expect.arrayContaining([
         'search_apple_docs',
         'get_apple_doc_content',
@@ -63,6 +65,8 @@ describe('AppleDeveloperDocsMCPServer', () => {
         'search_framework_symbols',
         'list_wwdc_videos',
         'list_wwdc_years',
+      ]));
+      expect(names).not.toEqual(expect.arrayContaining([
         'get_performance_report',
         'get_cache_stats',
       ]));

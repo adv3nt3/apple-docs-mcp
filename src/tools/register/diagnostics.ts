@@ -85,7 +85,19 @@ async function runGetCacheStats(): Promise<CallToolResult> {
   return { content: [{ type: 'text', text: report }] };
 }
 
+/**
+ * Register the diagnostic tools.
+ *
+ * These tools are operator-grade diagnostics — useful for humans debugging the
+ * server but not actionable for AI assistants. Hidden from `tools/list` unless
+ * `MCP_DIAGNOSTICS=true` is set in the environment, which keeps the default
+ * tool surface focused on consumer-facing operations.
+ */
 export function registerDiagnosticTools(server: McpServer): void {
+  if (process.env.MCP_DIAGNOSTICS !== 'true') {
+    return;
+  }
+
   server.registerTool(
     'get_performance_report',
     {

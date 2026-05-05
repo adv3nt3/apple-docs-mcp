@@ -493,6 +493,18 @@ The following environment variables (consumed in `src/utils/http-client.ts`) tun
 | `SIMPLE_HEADERS_MODE` | Set to `true` to send a minimal header set | `false` |
 | `DEFAULT_ACCEPT_LANGUAGE` | Override the default `Accept-Language` value | `en-US,en;q=0.9` |
 
+#### Logging & Diagnostics Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `MCP_LOG_LEVEL` | Minimum log level emitted on stderr (`debug`, `info`, `warn`, `error`; case-insensitive) | `info` |
+| `MCP_DEBUG` | Set to `true` to enable `debug`-level messages (in addition to `MCP_LOG_LEVEL`) | `false` |
+| `MCP_DIAGNOSTICS` | Set to `true` to expose the `get_performance_report` and `get_cache_stats` operator tools via `tools/list` | `false` |
+
+#### Operator diagnostics
+
+The server ships with two operator-grade diagnostic tools — `get_performance_report` and `get_cache_stats` — that surface HTTP client metrics, cache hit rates, framework preload status, and rate limiter state. These are useful for humans debugging the server but aren't actionable for AI assistants, so they're hidden from `tools/list` by default. Set `MCP_DIAGNOSTICS=true` in the server's environment (e.g., add `"env": { "MCP_DIAGNOSTICS": "true" }` to your MCP host config) to register them.
+
 ## 🧪 Development
 
 ### Quick Commands

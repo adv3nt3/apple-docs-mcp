@@ -14,9 +14,30 @@ export enum LogLevel {
   ERROR = 'error',
 }
 
+/**
+ * Coerce a free-form environment string (case-insensitive) into a `LogLevel`.
+ * Returns `undefined` for empty / unrecognized input so the caller can fall
+ * back to the default level.
+ */
+function parseLogLevel(raw: string | undefined): LogLevel | undefined {
+  if (!raw) {
+    return undefined;
+  }
+  const normalized = raw.trim().toLowerCase();
+  // Map narrows the comparison through string keys, sidestepping the
+  // `no-unsafe-enum-comparison` lint that fires on `case LogLevel.DEBUG:`.
+  const lookup: Record<string, LogLevel> = {
+    debug: LogLevel.DEBUG,
+    info: LogLevel.INFO,
+    warn: LogLevel.WARN,
+    error: LogLevel.ERROR,
+  };
+  return lookup[normalized];
+}
+
 class Logger {
   private enabled: boolean = process.env.MCP_DEBUG === 'true';
-  private level: LogLevel = LogLevel.INFO;
+  private level: LogLevel = parseLogLevel(process.env.MCP_LOG_LEVEL) ?? LogLevel.INFO;
 
   /**
    * Log debug message (gated by MCP_DEBUG=true; writes to stderr)
