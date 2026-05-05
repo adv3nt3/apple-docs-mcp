@@ -91,9 +91,9 @@ export default tseslint.config(
       // Core ESLint rules
       'no-console': ['warn', { allow: ['error', 'warn'] }],
       // ESLint 10 added preserve-caught-error (require `cause` when rethrowing in
-      // catch). Disabled for now — 18 existing call sites would need refactoring;
-      // tracked for a follow-up dedicated PR (see TODO in release notes).
-      'preserve-caught-error': 'off',
+      // catch). Use `appError(..., { cause: error })` or `new Error(msg, { cause: error })`
+      // when rethrowing inside a catch block so the original error stays attached.
+      'preserve-caught-error': 'error',
       'no-debugger': 'error',
       'prefer-const': 'error',
       'no-var': 'error',

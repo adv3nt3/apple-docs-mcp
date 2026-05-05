@@ -155,7 +155,7 @@ function searchInCode(
       const matchingLines = lines.filter(line => line.toLowerCase().includes(query));
 
       matches.push({
-        context: `[${example.language}] ${example.title || ''}: ${matchingLines[0]}`,
+        context: `[${example.language}] ${example.title ?? ''}: ${matchingLines[0]}`,
         timestamp: example.timestamp,
       });
     }

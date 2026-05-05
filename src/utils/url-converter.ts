@@ -85,6 +85,7 @@ export function assertAppleDeveloperUrl(url: string): void {
  */
 export function extractApiNameFromUrl(url: string): string {
   try {
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty-string path segment should fall back to 'Unknown API'
     return new URL(url).pathname.split('/').pop() || 'Unknown API';
   } catch {
     return 'Unknown API';

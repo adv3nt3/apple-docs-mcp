@@ -177,7 +177,7 @@ function formatCodeExamples(
     content += `## ${lang.charAt(0).toUpperCase() + lang.slice(1)}\n\n`;
 
     examplesByLanguage[lang].forEach(example => {
-      content += `### ${example.title || 'Code Example'}\n`;
+      content += `### ${example.title ?? 'Code Example'}\n`;
       content += `*From: [${example.videoTitle}](${example.videoUrl}) (WWDC${example.year})*`;
 
       if (example.timestamp) {

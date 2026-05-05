@@ -2,6 +2,7 @@ import { assertAppleDeveloperUrl, convertToJsonApiUrl } from '../utils/url-conve
 import { httpClient } from '../utils/http-client.js';
 import { logger } from '../utils/logger.js';
 import { PROCESSING_LIMITS, SEARCH_DEPTH_LIMITS } from '../utils/constants.js';
+import { appError, ErrorType } from '../utils/error-handler.js';
 
 /**
  * 相似API信息接口
@@ -71,7 +72,7 @@ export async function handleFindSimilarApis(
     if (response.data) {
       // Response has a data property, extract it
       data = response.data;
-      references = response.references || data.references;
+      references = response.references ?? data.references;
     } else {
       // Response is the data itself
       data = response;
@@ -108,10 +109,11 @@ export async function handleFindSimilarApis(
     uniqueApis.sort((a, b) => b.confidence - a.confidence);
 
     // 限制结果数量
-    const maxResults = SEARCH_DEPTH_LIMITS[searchDepth as keyof typeof SEARCH_DEPTH_LIMITS] || SEARCH_DEPTH_LIMITS.medium;
+    const maxResults = SEARCH_DEPTH_LIMITS[searchDepth as keyof typeof SEARCH_DEPTH_LIMITS] ?? SEARCH_DEPTH_LIMITS.medium;
     const limitedApis = uniqueApis.slice(0, maxResults);
 
     // Get the title from data
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty-string title should fall through to next candidate
     const title = data.title || data.metadata?.title || data.identifier?.split('/').pop() || 'API';
 
     return formatSimilarApis(apiUrl, limitedApis, title, data);
@@ -121,7 +123,7 @@ export async function handleFindSimilarApis(
     if (errorMessage.includes('Invalid Apple Developer Documentation URL')) {
       throw error;
     }
-    throw new Error(errorMessage);
+    throw appError(ErrorType.UNKNOWN, errorMessage, { cause: error });
   }
 }
 
@@ -217,7 +219,7 @@ async function extractDeepRelatedApis(seedApis: SimilarAPI[]): Promise<SimilarAP
 
       if (response.data) {
         data = response.data;
-        references = response.references || data.references;
+        references = response.references ?? data.references;
       } else {
         data = response;
         references = data.references;
@@ -254,13 +256,13 @@ function createSimilarApi(
   if (references?.[identifier]) {
     const ref = references[identifier];
     return {
-      title: ref.title || 'Unknown',
+      title: ref.title ?? 'Unknown',
       url: ref.url ? `https://developer.apple.com${ref.url}` : '#',
       identifier,
-      abstract: ref.abstract ? ref.abstract.map((a: any) => a.text || '').join(' ').trim() : undefined,
+      abstract: ref.abstract ? ref.abstract.map((a: any) => a.text ?? '').join(' ').trim() : undefined,
       category,
       similarityType,
-      symbolKind: ref.kind || ref.symbolKind,
+      symbolKind: ref.kind ?? ref.symbolKind,
       platforms: ref.platforms ? ref.platforms.map((p: any) => p.name) : undefined,
       confidence,
     };
@@ -317,6 +319,7 @@ function formatSimilarApis(
   originalApiName?: string,
   originalData?: AppleDocData,
 ): string {
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty-string apiName/path-segment should fall through to next candidate
   const apiName = originalApiName || new URL(originalUrl).pathname.split('/').pop() || 'API';
   let content = `# Similar APIs to ${apiName}\n\n`;
 
@@ -327,8 +330,8 @@ function formatSimilarApis(
 
   // Add metadata about the original API if available
   if (originalData?.metadata) {
-    const roleHeading = originalData.metadata.roleHeading || '';
-    const platforms = originalData.metadata.platforms?.map(p => `${p.name} ${p.introducedAt || ''}+`).join(', ') || '';
+    const roleHeading = originalData.metadata.roleHeading ?? '';
+    const platforms = originalData.metadata.platforms?.map(p => `${p.name} ${p.introducedAt ?? ''}+`).join(', ') ?? '';
     if (roleHeading || platforms) {
       content += `${roleHeading}${platforms ? ' · ' + platforms : ''}\n\n`;
     }

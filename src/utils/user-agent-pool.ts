@@ -521,9 +521,7 @@ export class UserAgentPool {
 
     // Find current position in enabled agents
     let nextIndex = enabledIndices.find(index => index > this.currentIndex);
-    if (nextIndex === undefined) {
-      nextIndex = enabledIndices[0]; // Wrap around
-    }
+    nextIndex ??= enabledIndices[0]; // Wrap around
 
     this.currentIndex = nextIndex;
     return this.agents[nextIndex];

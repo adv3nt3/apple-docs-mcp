@@ -135,12 +135,12 @@ function extractApiFromIdentifier(
   if (references?.[identifier]) {
     const ref = references[identifier];
     return {
-      title: ref.title || 'Unknown',
+      title: ref.title ?? 'Unknown',
       url: ref.url ? `https://developer.apple.com${ref.url}` : '#',
       identifier,
-      type: ref.kind || ref.type || 'unknown',
+      type: ref.kind ?? ref.type ?? 'unknown',
       relationship,
-      abstract: ref.abstract ? ref.abstract.map((a: any) => a.text || '').join(' ').trim() : undefined,
+      abstract: ref.abstract ? ref.abstract.map((a: any) => a.text ?? '').join(' ').trim() : undefined,
     };
   }
 
@@ -184,6 +184,7 @@ function formatRelatedApis(originalUrl: string, relatedApis: RelatedAPI[]): stri
     return `No related APIs found for: ${originalUrl}`;
   }
 
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- empty-string path segment should fall back to 'API'
   const apiName = new URL(originalUrl).pathname.split('/').pop() || 'API';
   let content = `# Related APIs for ${apiName}\n\n`;
   content += `**Source:** [${originalUrl}](${originalUrl})\n\n`;

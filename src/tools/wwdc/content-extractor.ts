@@ -40,7 +40,7 @@ export async function extractVideoContent(
     const speakers = extractSpeakers(document);
     const duration = extractDuration(document);
     // Use known topics or infer topics
-    const topics = knownTopics || inferTopics(title, extractDescription(document));
+    const topics = knownTopics ?? inferTopics(title, extractDescription(document));
 
     // Detect if there's a Code tab (WWDC22 and later) - now only used for logging
     const hasCodeTab = detectCodeTab(document, year);
@@ -134,9 +134,9 @@ function extractDescription(document: Document): string {
     const element = document.querySelector(selector);
     if (element) {
       if (selector.includes('meta')) {
-        return element.getAttribute('content') || '';
+        return element.getAttribute('content') ?? '';
       }
-      return element.textContent?.trim() || '';
+      return element.textContent?.trim() ?? '';
     }
   }
 
@@ -244,9 +244,9 @@ function extractTranscriptFromDocument(document: Document): TranscriptData {
   );
 
   paragraphs.forEach((p: Element) => {
-    const timestamp = p.getAttribute('data-timestamp') ||
-                     p.querySelector('.timestamp')?.textContent || '';
-    const text = p.textContent?.replace(/^\d+:\d+\s*/, '').trim() || '';
+    const timestamp = p.getAttribute('data-timestamp') ??
+                     p.querySelector('.timestamp')?.textContent ?? '';
+    const text = p.textContent?.replace(/^\d+:\d+\s*/, '').trim() ?? '';
 
     if (text) {
       if (timestamp) {
@@ -289,8 +289,8 @@ async function extractCodeExamples(_document: Document, videoUrl: string): Promi
 
       codeBlocks.forEach((block: Element) => {
         // Get code content
-        const codeEl = block.querySelector('code') || block;
-        let code = codeEl.textContent || '';
+        const codeEl = block.querySelector('code') ?? block;
+        let code = codeEl.textContent ?? '';
         // Clean up code indentation
         code = cleanCodeIndentation(code);
 
@@ -317,7 +317,7 @@ async function extractCodeExamples(_document: Document, videoUrl: string): Promi
 
         // If not found, try other methods
         if (!timestamp) {
-          timestamp = block.closest('[data-timestamp]')?.getAttribute('data-timestamp') || '';
+          timestamp = block.closest('[data-timestamp]')?.getAttribute('data-timestamp') ?? '';
         }
 
         const language = detectLanguage(block);
@@ -389,7 +389,7 @@ function detectLanguage(element: Element): string {
   }
 
   // Detect from data attributes
-  const dataLang = element.getAttribute('data-language') ||
+  const dataLang = element.getAttribute('data-language') ??
                   element.getAttribute('data-lang');
   if (dataLang) {
     return dataLang.toLowerCase();
@@ -410,10 +410,10 @@ function extractChapters(document: Document): Chapter[] {
   );
 
   chapterElements.forEach((element: Element) => {
-    const title = element.querySelector('.chapter-title')?.textContent ||
-                 element.textContent?.trim() || '';
-    const timestamp = element.getAttribute('data-timestamp') ||
-                     element.querySelector('.timestamp')?.textContent || '';
+    const title = element.querySelector('.chapter-title')?.textContent ??
+                 element.textContent?.trim() ?? '';
+    const timestamp = element.getAttribute('data-timestamp') ??
+                     element.querySelector('.timestamp')?.textContent ?? '';
 
     if (title && timestamp) {
       chapters.push({ title, timestamp });
@@ -457,8 +457,8 @@ async function extractResources(document: Document, videoUrl: string): Promise<V
   // Fallback: at least try to extract video download links
   const downloadLinks = document.querySelectorAll('a[href*=".mp4"], a[download]');
   downloadLinks.forEach((link: Element) => {
-    const href = link.getAttribute('href') || '';
-    const text = link.textContent?.toLowerCase() || '';
+    const href = link.getAttribute('href') ?? '';
+    const text = link.textContent?.toLowerCase() ?? '';
 
     if (href.includes('_hd.mp4') || text.includes('hd')) {
       resources.hdVideo = href.startsWith('http') ? href : `${WWDC_URLS.BASE.replace('/videos', '')}${href}`;
@@ -483,8 +483,8 @@ function extractResourcesFromDocument(document: Document): VideoResources {
   const processedUrls = new Set<string>();
 
   resourceLinks.forEach((link: Element) => {
-    const href = link.getAttribute('href') || '';
-    const text = link.textContent?.trim() || '';
+    const href = link.getAttribute('href') ?? '';
+    const text = link.textContent?.trim() ?? '';
 
     if (!href || !text) {
       return;
@@ -542,13 +542,13 @@ async function extractRelatedVideos(document: Document, videoUrl: string): Promi
       const currentVideoId = videoUrl.match(/\/(\d+)\/?$/)?.[1];
 
       videoLinks.forEach((link: Element) => {
-        const href = link.getAttribute('href') || '';
+        const href = link.getAttribute('href') ?? '';
         const match = href.match(/\/videos\/play\/wwdc(\d{4})\/(\d+)\/?/);
 
         if (match && match[2] !== currentVideoId) {
           const year = match[1];
           const id = match[2];
-          const title = link.textContent?.trim() || '';
+          const title = link.textContent?.trim() ?? '';
 
           // Filter out current video and already added videos
           if (title && !relatedVideos.find(v => v.id === id)) {
@@ -591,7 +591,7 @@ function cleanCodeIndentation(code: string): string {
   const minIndent = lines
     .filter(line => line.trim().length > 0)
     .reduce((min, line) => {
-      const indent = line.match(/^(\s*)/)?.[1].length || 0;
+      const indent = line.match(/^(\s*)/)?.[1].length ?? 0;
       return Math.min(min, indent);
     }, Infinity);
 
