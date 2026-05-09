@@ -15,6 +15,11 @@ jobs:
       packages: write
       id-token: write
 
+    # Job-level env: GitHub forbids `secrets.*` in step-level `if:` conditions,
+    # so we hoist the boolean here. Steps gate on `env.HAS_NPM_TOKEN`.
+    env:
+      HAS_NPM_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -80,13 +85,13 @@ jobs:
           echo "✅ Version check passed: $PACKAGE_VERSION"
 
       - name: Publish to npm
-        if: ${{ secrets.NPM_TOKEN != '' }}
+        if: env.HAS_NPM_TOKEN == 'true'
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Skip npm publish (no NPM_TOKEN secret configured)
-        if: ${{ secrets.NPM_TOKEN == '' }}
+        if: env.HAS_NPM_TOKEN == 'false'
         run: |
           echo "::notice::NPM_TOKEN secret is not configured for this repo."
           echo "::notice::Skipping npm publish. The GitHub release + tarball is still produced."
