@@ -7,6 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] — 2026-05-09
+
+### Added
+
+- **Env-gated diagnostic tools** ([#6](https://github.com/adv3nt3/apple-docs-mcp/pull/6)):
+  `get_performance_report` and `get_cache_stats` are no longer exposed by
+  default — set `MCP_DIAGNOSTICS=true` to register them. Keeps the default
+  tool surface focused on consumer-facing operations.
+- **`MCP_LOG_LEVEL` env var** ([#6](https://github.com/adv3nt3/apple-docs-mcp/pull/6)):
+  case-insensitive `debug` / `info` / `warn` / `error`; default `info`.
+  Wires the previously dead `setLevel` API to operator control.
+- **Touch-on-get LRU semantics for `MemoryCache`** ([#6](https://github.com/adv3nt3/apple-docs-mcp/pull/6)):
+  hot keys survive eviction waves under high-cardinality workloads. TTL is
+  preserved — touch does NOT reset the timestamp.
+- **`CHANGELOG.md`** ([#6](https://github.com/adv3nt3/apple-docs-mcp/pull/6))
+  in Keep-a-Changelog format.
+- **`assertAppleDeveloperUrl` protocol check** ([#6](https://github.com/adv3nt3/apple-docs-mcp/pull/6)):
+  also asserts `http:` / `https:` scheme. +8 regression tests for `ftp:` /
+  `file:` / `javascript:` / `data:` URLs.
+- **`appError({ cause })` factory option** ([#6](https://github.com/adv3nt3/apple-docs-mcp/pull/6)):
+  preferred over the legacy `originalError` (still accepted for
+  back-compat). 10 catch sites migrated; ESLint 10's
+  `preserve-caught-error` rule re-enabled.
+
+### Changed
+
+- **Tool registration split per domain** ([#6](https://github.com/adv3nt3/apple-docs-mcp/pull/6)):
+  `src/tools/register-tools.ts` (592 LOC) → entry (33 LOC) +
+  `register/{search,framework,wwdc,diagnostics,_shared}.ts`.
+- **WWDC handlers split per handler** ([#6](https://github.com/adv3nt3/apple-docs-mcp/pull/6)):
+  `wwdc-handlers.ts` (1,032 LOC) → 7 per-handler files (`list-videos.ts`,
+  `search-content.ts`, …) + `_shared.ts`. Restores the project's "one tool
+  per file" convention.
+- **`fetchAppleDocJson` properly typed** as `Promise<CallToolResult>`
+  (was `Promise<any>`) ([#6](https://github.com/adv3nt3/apple-docs-mcp/pull/6)).
+- **READMEs rewritten** around build-from-source ([#6](https://github.com/adv3nt3/apple-docs-mcp/pull/6)):
+  npm-style snippets preserved in a "Once published to npm" subsection.
+- **`CLAUDE.md` rewritten** to describe the post-1.1 architecture
+  (`McpServer.registerTool`, three places to touch when adding a tool, etc.)
+  ([#6](https://github.com/adv3nt3/apple-docs-mcp/pull/6)).
+- **Lint warnings**: ~62 `||` → `??` conversions across 14 source files;
+  warning count 197 → 113 (-84) ([#6](https://github.com/adv3nt3/apple-docs-mcp/pull/6)).
+
+### Tests
+
+- Test count: 565 → 574 (+9 — logger env wiring, LRU semantics, diagnostics
+  toggle).
+
 ## [1.1.0] — 2026-05-04
 
 ### Security
