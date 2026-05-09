@@ -7,6 +7,7 @@ import { registerAllTools } from './tools/register-tools.js';
 import { preloadPopularFrameworks } from './utils/preloader.js';
 import { warmUpCaches, schedulePeriodicCacheRefresh } from './utils/cache-warmer.js';
 import { logger } from './utils/logger.js';
+import { getServerVersion } from './utils/server-version.js';
 
 export default class AppleDeveloperDocsMCPServer {
   private server: McpServer;
@@ -14,7 +15,7 @@ export default class AppleDeveloperDocsMCPServer {
   constructor() {
     this.server = new McpServer({
       name: 'apple-docs-mcp',
-      version: '1.0.0',
+      version: getServerVersion(),
     });
 
     registerAllTools(this.server);

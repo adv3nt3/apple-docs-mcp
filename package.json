@@ -25,7 +25,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc && cp -r data dist/",
+    "build": "tsc && cp -r data dist/ && cp package.json dist/",
     "dev": "tsc --watch",
     "start": "node dist/index.js",
     "clean": "rm -rf dist",

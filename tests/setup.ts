@@ -10,6 +10,12 @@ jest.mock('../src/utils/wwdc-data-source-path.js', () => ({
   getWWDCDataDirectory: jest.fn(() => '/mock/data/wwdc')
 }));
 
+// Same — server-version reads package.json via import.meta.url, which
+// ts-jest's CJS transform can't parse.
+jest.mock('../src/utils/server-version.js', () => ({
+  getServerVersion: jest.fn(() => '0.0.0-test')
+}));
+
 // Mock console.error to avoid noise in tests
 const originalConsoleError = console.error;
 beforeEach(() => {
