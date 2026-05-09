@@ -40,6 +40,32 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      - name: Prune to production node_modules
+        # Match the brew formula's runtime tree: production deps only,
+        # --ignore-scripts to skip esbuild/unrs-resolver native postinstalls
+        # (devDep-only optimisations that would otherwise need PNPM-10's
+        # interactive consent and don't ship in the bottle).
+        run: |
+          rm -rf node_modules
+          pnpm install --frozen-lockfile --prod --ignore-scripts
+
+      - name: Package bottle tarball
+        # Layout matches what Formula/apple-docs-mcp.rb expects at libexec/:
+        # dist contents at top level (`cp package.json dist/` in the build
+        # script also lands package.json under dist/), plus production
+        # node_modules. Formula does `libexec.install Dir["*"]`.
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          STAGING=$(mktemp -d)
+          cp -r dist/* "$STAGING/"
+          cp -r node_modules "$STAGING/node_modules"
+          cp LICENSE "$STAGING/" 2>/dev/null || true
+          tar -C "$STAGING" -czvf "apple-docs-mcp-${VERSION}.tar.gz" .
+          shasum -a 256 "apple-docs-mcp-${VERSION}.tar.gz" \
+            > "apple-docs-mcp-${VERSION}.tar.gz.sha256"
+          ls -lh "apple-docs-mcp-${VERSION}.tar.gz" \
+                 "apple-docs-mcp-${VERSION}.tar.gz.sha256"
+
       - name: Verify package
         run: |
           # Check package.json version matches tag
@@ -70,10 +96,18 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           generate_release_notes: true
+          files: |
+            apple-docs-mcp-*.tar.gz
+            apple-docs-mcp-*.sha256
           body: |
-            ## 🚀 Published to npm
+            ## 🍺 Homebrew
 
-            Install with:
+            ```bash
+            brew install adv3nt3/tap/apple-docs-mcp
+            ```
+
+            ## 🚀 npm
+
             ```bash
             npm install @adv3nt3/apple-docs-mcp
             ```

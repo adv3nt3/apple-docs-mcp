@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] — 2026-05-10
+
+### Added
+
+- **Homebrew bottle delivery** via `adv3nt3/tap`. Releases now publish a
+  prebuilt `apple-docs-mcp-${version}.tar.gz` (compiled `dist/` + pruned
+  production `node_modules/`) and a sibling `.sha256` artifact. The brew
+  formula consumes those instead of running `pnpm install` + `tsc` on the
+  user's machine — install drops from ~30s to ~5s and no longer needs
+  `pnpm` as a build dep. Source-build path (`brew install --HEAD`)
+  retained for contributors.
+
+### Fixed
+
+- **`serverInfo.version` now reads from `package.json` at runtime** instead
+  of returning the hardcoded `"1.0.0"` legacy from the upstream codebase.
+  Carried over from `ffeacc7` on `main` (post-1.2.0). MCP clients see
+  the correct version string in `initialize` responses.
+
+### Changed
+
+- **Build script** (`pnpm run build`) now also copies `package.json` into
+  `dist/` so `getServerVersion()` can resolve it from the compiled tree
+  (works under both `node dist/index.js` and `brew install`).
+
 ## [1.2.0] — 2026-05-09
 
 ### Added
